@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../routes/app_routes.dart';
 
 class ActionButtonsWidget extends StatelessWidget {
   const ActionButtonsWidget({super.key});
@@ -58,7 +59,7 @@ class ActionButtonsWidget extends StatelessWidget {
               label: 'Saved Recipes',
               color: Colors.white,
               onPressed: () {
-                Navigator.pushNamed(context, '/saved-recipes');
+                Navigator.pushNamed(context, AppRoutes.savedRecipes);
               },
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/landing_page/landing_page.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/auth/questionnaire_screen.dart';
@@ -8,21 +9,25 @@ import '../screens/recipes/recipe_generate_screen.dart';
 import '../screens/recipes/saved_recipes_screen.dart';
 
 class AppRoutes {
-  static const String login = '/login';
-  static const String signup = '/signup';
-  static const String questionnaire = '/questionnaire';
-  static const String home = '/home';
+  static const landing = '/';
+  static const login = '/login';
+  static const signup = '/signup';
+  static const questionnaire = '/questionnaire';
+  static const home = '/home';
   static const String scanFridge = '/scan-fridge';
-  static const String generateRecipe = '/generate-recipe';
-  static const String savedRecipes = '/saved-recipes';
+  static const recipeDetail = '/recipe_detail';
+  static const recipeGenerate = '/recipe_generate';
+  static const savedRecipes = '/saved_recipes';
+  static const fridgeScan = '/fridge_scan';
 
   static Map<String, WidgetBuilder> routes = {
-    login: (context) => const LoginScreen(),
-    signup: (context) => const SignupScreen(),
-    questionnaire: (context) => const QuestionnaireScreen(),
-    home: (context) => const HomeScreen(),
+    landing: (_) => const LandingPage(),
+    login: (_) => const LoginScreen(),
+    signup: (_) => const SignupScreen(),
+    questionnaire: (_) => const QuestionnaireScreen(),
+    home: (_) => const HomeScreen(),
     scanFridge: (context) => const FridgeScanScreen(),
-    generateRecipe: (context) => const RecipeGenerateScreen(),
+    recipeGenerate: (context) => const RecipeGenerateScreen(),
     savedRecipes: (context) => const SavedRecipesScreen(),
   };
 }

@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
   final _firestoreService = FirestoreService();
@@ -122,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // Filter items based on search
                           final filteredItems = items.where((item) {
-                            return !_isSearching || 
+                            return !_isSearching ||
                                 item.name.toLowerCase().contains(_searchController.text.toLowerCase());
                           }).toList();
 
@@ -141,15 +142,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             ..sort((a, b) {
                               final aLower = a.toLowerCase();
                               final bLower = b.toLowerCase();
-                              
+
                               // Priority order: meat, vegetables, dairy, then alphabetical, then other
                               final aPriority = _getCategoryPriority(aLower);
                               final bPriority = _getCategoryPriority(bLower);
-                              
+
                               if (aPriority != bPriority) {
                                 return aPriority.compareTo(bPriority);
                               }
-                              
+
                               if (aLower == 'other') return 1;
                               if (bLower == 'other') return -1;
                               return a.compareTo(b);
