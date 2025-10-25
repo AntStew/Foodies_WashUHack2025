@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../routes/app_routes.dart';
 
 class ActionButtonsWidget extends StatelessWidget {
   const ActionButtonsWidget({super.key});
@@ -47,7 +48,7 @@ class ActionButtonsWidget extends StatelessWidget {
             label: 'Scan Fridge',
             color: Colors.white,
             onPressed: () {
-              Navigator.pushNamed(context, '/scan-fridge');
+              Navigator.pushNamed(context, AppRoutes.scanFridge);
             },
           ),
         ),
@@ -58,7 +59,7 @@ class ActionButtonsWidget extends StatelessWidget {
             label: 'Generate Recipe',
             color: Colors.white,
             onPressed: () {
-              Navigator.pushNamed(context, '/generate-recipe');
+              Navigator.pushNamed(context, AppRoutes.generateRecipe);
             },
           ),
         ),
@@ -69,7 +70,7 @@ class ActionButtonsWidget extends StatelessWidget {
             label: 'Saved Recipes',
             color: Colors.white,
             onPressed: () {
-              Navigator.pushNamed(context, '/saved-recipes');
+              Navigator.pushNamed(context, AppRoutes.savedRecipes);
             },
           ),
         ),
@@ -88,7 +89,7 @@ class ActionButtonsWidget extends StatelessWidget {
                 label: 'Scan Fridge',
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/scan-fridge');
+                  Navigator.pushNamed(context, AppRoutes.scanFridge);
                 },
               ),
             ),
@@ -99,7 +100,7 @@ class ActionButtonsWidget extends StatelessWidget {
                 label: 'Generate Recipe',
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/generate-recipe');
+                  Navigator.pushNamed(context, AppRoutes.generateRecipe);
                 },
               ),
             ),
@@ -113,7 +114,7 @@ class ActionButtonsWidget extends StatelessWidget {
             label: 'Saved Recipes',
             color: Colors.white,
             onPressed: () {
-              Navigator.pushNamed(context, '/saved-recipes');
+              Navigator.pushNamed(context, AppRoutes.savedRecipes);
             },
           ),
         ),
