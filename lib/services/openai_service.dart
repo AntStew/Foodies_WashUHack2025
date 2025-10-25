@@ -2,7 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import '../utils/logger.dart';
 
 class OpenAIService {
-  final FirebaseFunctions _functions = FirebaseFunctions.instance;
+  final FirebaseFunctions _functions = FirebaseFunctions.instanceFor(region: 'us-central1');
 
   // Analyze fridge image and extract items using Cloud Function
   Future<List<Map<String, String>>> analyzeFridgeImage(String imageUrl) async {

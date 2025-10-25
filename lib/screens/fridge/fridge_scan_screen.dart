@@ -8,7 +8,6 @@ import '../../services/openai_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/fridge_item_model.dart';
 import '../../models/shopping_list_item_model.dart';
-import '../../models/user_model.dart';
 
 class FridgeScanScreen extends StatefulWidget {
   const FridgeScanScreen({super.key});

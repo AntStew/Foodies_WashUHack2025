@@ -28,8 +28,8 @@ service cloud.firestore {
         allow read, write: if isOwner(userId);
       }
 
-      // Shopping lists subcollection
-      match /shoppingLists/{listId} {
+      // Shopping list subcollection
+      match /shoppingList/{itemId} {
         allow read, write: if isOwner(userId);
       }
     }

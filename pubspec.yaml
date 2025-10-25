@@ -80,7 +80,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
     - design/Assestss/
     - design/Assestss/3.jpeg
 
