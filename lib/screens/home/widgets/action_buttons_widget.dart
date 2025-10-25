@@ -45,7 +45,7 @@ class ActionButtonsWidget extends StatelessWidget {
                   label: 'Generate Recipe',
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pushNamed(context, '/generate-recipe');
+                    Navigator.pushNamed(context, AppRoutes.recipeGenerate);
                   },
                 ),
               ),
