@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/recipe_model.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
@@ -17,6 +18,33 @@ class RecipeDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Recipe Image
+            if (recipe.imageUrl != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: recipe.imageUrl!,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: Icon(Icons.error, size: 50),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             Text(
               recipe.title,
               style: const TextStyle(

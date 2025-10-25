@@ -210,8 +210,6 @@ dependencies:
    firebase deploy --only functions
    ```
 
-   See `DEPLOY_INSTRUCTIONS.md` for detailed steps.
-
 4. **Run the app**
    ```bash
    # For web
@@ -226,7 +224,7 @@ dependencies:
 
 ### First Run
 
-1. Sign up with any email (e.g., `test@example.com` / `password123`)
+1. Sign up with any email (e.g., `test@gmail.com` / `aaaa1111`)
 2. Complete the questionnaire with your preferences
 3. Upload a fridge photo or test image
 4. Wait for AI analysis (~5-10 seconds)

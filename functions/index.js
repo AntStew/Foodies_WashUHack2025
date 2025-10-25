@@ -2,12 +2,73 @@ const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {initializeApp} = require("firebase-admin/app");
 const {defineSecret} = require("firebase-functions/params");
 const OpenAI = require("openai");
+const axios = require("axios");
 
-// Define the OpenAI API key as a secret
+// Define the API keys as secrets
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
+const pexelsApiKey = defineSecret("PEXELS_API_KEY");
 
 // Initialize Firebase Admin
 initializeApp();
+
+/**
+ * Helper function to search for images using Pexels API
+ * @param {string} query - Search query for the image
+ * @returns {Promise<string|null>} - Image URL or null if not found
+ */
+async function searchPexelsImage(query) {
+  try {
+    console.log(`Searching Pexels for: "${query} food"`);
+    const response = await axios.get("https://api.pexels.com/v1/search", {
+      headers: {
+        "Authorization": pexelsApiKey.value(),
+      },
+      params: {
+        query: `${query} food`,
+        per_page: 1,
+        orientation: "landscape",
+      },
+    });
+
+    console.log(`Pexels response status: ${response.status}`);
+    console.log(`Pexels response data:`, JSON.stringify(response.data, null, 2));
+
+    if (response.data.photos && response.data.photos.length > 0) {
+      const imageUrl = response.data.photos[0].src.large;
+      console.log(`Found image URL: ${imageUrl}`);
+      return imageUrl;
+    }
+    console.log("No photos found in Pexels response");
+    return null;
+  } catch (error) {
+    console.error("Error searching Pexels:", error.response?.data || error.message);
+    
+    // Fallback to Unsplash API (free, no key required for basic usage)
+    try {
+      console.log(`Trying Unsplash fallback for: "${query} food"`);
+      const unsplashResponse = await axios.get("https://api.unsplash.com/search/photos", {
+        headers: {
+          "Accept-Version": "v1",
+        },
+        params: {
+          query: `${query} food`,
+          per_page: 1,
+          orientation: "landscape",
+        },
+      });
+
+      if (unsplashResponse.data.results && unsplashResponse.data.results.length > 0) {
+        const imageUrl = unsplashResponse.data.results[0].urls.regular;
+        console.log(`Found Unsplash image URL: ${imageUrl}`);
+        return imageUrl;
+      }
+    } catch (unsplashError) {
+      console.error("Unsplash fallback also failed:", unsplashError.response?.data || unsplashError.message);
+    }
+    
+    return null;
+  }
+}
 
 /**
  * Cloud Function to analyze fridge image using OpenAI Vision API
@@ -107,7 +168,7 @@ Only return the JSON array, nothing else.`,
  * @returns {Object} Recipe object with title, description, ingredients, instructions, etc.
  */
 exports.generateRecipe = onCall(
-  {secrets: [openaiApiKey]},
+  {secrets: [openaiApiKey, pexelsApiKey]},
   async (request) => {
   // Verify authentication
   if (!request.auth) {
@@ -183,6 +244,16 @@ Only return the JSON object, nothing else.`,
     const jsonMatch = content.match(/\{.*\}/s);
     if (jsonMatch) {
       const recipe = JSON.parse(jsonMatch[0]);
+      
+      // Search for recipe image using Pexels API
+      try {
+        const imageUrl = await searchPexelsImage(recipe.title);
+        recipe.imageUrl = imageUrl;
+      } catch (imageError) {
+        console.error("Error fetching recipe image:", imageError);
+        recipe.imageUrl = null;
+      }
+      
       return {success: true, recipe};
     }
 

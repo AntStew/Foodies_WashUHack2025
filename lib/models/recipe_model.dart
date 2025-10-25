@@ -13,6 +13,7 @@ class Recipe {
   final DateTime savedAt;
   final bool isFavorite;
   final List<String> usedIngredients;
+  final String? imageUrl;
 
   Recipe({
     required this.id,
@@ -27,6 +28,7 @@ class Recipe {
     required this.savedAt,
     this.isFavorite = false,
     this.usedIngredients = const [],
+    this.imageUrl,
   });
 
   Map<String, dynamic> toMap() {
@@ -42,6 +44,7 @@ class Recipe {
       'savedAt': Timestamp.fromDate(savedAt),
       'isFavorite': isFavorite,
       'usedIngredients': usedIngredients,
+      'imageUrl': imageUrl,
       'generatedBy': 'openai',
     };
   }
@@ -60,10 +63,11 @@ class Recipe {
       savedAt: (map['savedAt'] as Timestamp).toDate(),
       isFavorite: map['isFavorite'] ?? false,
       usedIngredients: List<String>.from(map['usedIngredients'] ?? []),
+      imageUrl: map['imageUrl'],
     );
   }
 
-  Recipe copyWith({bool? isFavorite}) {
+  Recipe copyWith({bool? isFavorite, String? imageUrl}) {
     return Recipe(
       id: id,
       title: title,
@@ -77,6 +81,7 @@ class Recipe {
       savedAt: savedAt,
       isFavorite: isFavorite ?? this.isFavorite,
       usedIngredients: usedIngredients,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

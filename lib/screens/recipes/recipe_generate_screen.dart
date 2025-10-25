@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/openai_service.dart';
@@ -66,6 +67,7 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
         instructions: List<String>.from(recipeData['instructions'] ?? []),
         usedIngredients: List<String>.from(recipeData['usedIngredients'] ?? []),
         savedAt: DateTime.now(),
+        imageUrl: recipeData['imageUrl'],
       );
 
       setState(() {
@@ -171,6 +173,33 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Recipe Image
+                      if (_generatedRecipe!.imageUrl != null) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: CachedNetworkImage(
+                            imageUrl: _generatedRecipe!.imageUrl!,
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              height: 200,
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              height: 200,
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: Icon(Icons.error, size: 50),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       Text(
                         _generatedRecipe!.title,
                         style: const TextStyle(
@@ -184,13 +213,13 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 16),
-                      Row(
+                      Wrap(
+                        spacing: 8,
                         children: [
                           Chip(label: Text(_generatedRecipe!.cuisine)),
-                          const SizedBox(width: 8),
                           Chip(label: Text('Prep: ${_generatedRecipe!.prepTime}')),
-                          const SizedBox(width: 8),
                           Chip(label: Text('Cook: ${_generatedRecipe!.cookTime}')),
+                          Chip(label: Text('${_generatedRecipe!.servings} servings')),
                         ],
                       ),
                       const SizedBox(height: 24),

@@ -1,4 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import '../utils/logger.dart';
 
 class OpenAIService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
@@ -21,7 +22,7 @@ class OpenAIService {
 
       return [];
     } catch (e) {
-      print('Error analyzing fridge: $e');
+      AppLogger.error('Error analyzing fridge', e);
       return [];
     }
   }
@@ -48,7 +49,7 @@ class OpenAIService {
 
       return null;
     } catch (e) {
-      print('Error generating recipe: $e');
+      AppLogger.error('Error generating recipe', e);
       return null;
     }
   }

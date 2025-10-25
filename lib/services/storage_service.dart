@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import '../utils/logger.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -15,7 +16,7 @@ class StorageService {
 
       return downloadUrl;
     } catch (e) {
-      print('Upload error: $e');
+      AppLogger.error('Upload error', e);
       rethrow;
     }
   }
@@ -31,7 +32,7 @@ class StorageService {
 
       return downloadUrl;
     } catch (e) {
-      print('Upload error: $e');
+      AppLogger.error('Upload error', e);
       rethrow;
     }
   }
@@ -41,7 +42,7 @@ class StorageService {
       final ref = _storage.refFromURL(imageUrl);
       await ref.delete();
     } catch (e) {
-      print('Delete error: $e');
+      AppLogger.error('Delete error', e);
     }
   }
 }

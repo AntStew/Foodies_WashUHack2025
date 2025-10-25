@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/logger.dart';
 import 'firestore_service.dart';
 
 class AuthService {
@@ -23,7 +24,7 @@ class AuthService {
 
       return credential.user;
     } catch (e) {
-      print('Sign up error: $e');
+      AppLogger.error('Sign up error', e);
       rethrow;
     }
   }
@@ -37,7 +38,7 @@ class AuthService {
       );
       return credential.user;
     } catch (e) {
-      print('Sign in error: $e');
+      AppLogger.error('Sign in error', e);
       rethrow;
     }
   }
