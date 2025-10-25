@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../models/fridge_item_model.dart';
+import '../../../../../models/fridge_item_model.dart';
 
 class FridgeItemWidget extends StatelessWidget {
   final FridgeItem item;

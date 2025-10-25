@@ -53,4 +53,36 @@ class OpenAIService {
       return null;
     }
   }
+
+  // Generate shopping list based on current fridge contents using Cloud Function
+  Future<List<Map<String, String>>> generateShoppingList(
+    List<String> currentIngredients,
+    List<String> dietaryRestrictions,
+    List<String> cuisinePreferences,
+    int servingSize,
+  ) async {
+    try {
+      final callable = _functions.httpsCallable('generateShoppingList');
+      final result = await callable.call({
+        'currentIngredients': currentIngredients,
+        'dietaryRestrictions': dietaryRestrictions,
+        'cuisinePreferences': cuisinePreferences,
+        'servingSize': servingSize,
+      });
+
+      if (result.data['success'] == true) {
+        final items = result.data['items'] as List;
+        return items.map((item) => {
+          'name': item['name'] as String,
+          'category': item['category'] as String,
+          'quantity': item['quantity'] as String,
+        }).toList();
+      }
+
+      return [];
+    } catch (e) {
+      AppLogger.error('Error generating shopping list', e);
+      return [];
+    }
+  }
 }

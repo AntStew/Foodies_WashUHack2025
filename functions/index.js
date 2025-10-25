@@ -269,3 +269,103 @@ Only return the JSON object, nothing else.`,
     );
   }
 });
+
+/**
+ * Cloud Function to generate shopping list based on fridge contents using OpenAI
+ *
+ * @param {Object} data - Request data
+ * @param {Array<string>} data.currentIngredients - List of current fridge items
+ * @param {Array<string>} data.dietaryRestrictions - User's dietary restrictions
+ * @param {Array<string>} data.cuisinePreferences - User's cuisine preferences
+ * @param {number} data.servingSize - Typical serving size for the user
+ * @returns {Object} Shopping list items array
+ */
+exports.generateShoppingList = onCall(
+  {secrets: [openaiApiKey]},
+  async (request) => {
+  // Verify authentication
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "User must be authenticated to generate shopping lists."
+    );
+  }
+
+  const {
+    currentIngredients = [],
+    dietaryRestrictions = [],
+    cuisinePreferences = [],
+    servingSize = 2,
+  } = request.data;
+
+  try {
+    // Initialize OpenAI client with the secret
+    const openai = new OpenAI({
+      apiKey: openaiApiKey.value(),
+    });
+
+    const dietaryText = dietaryRestrictions.length > 0
+      ? `\nDietary restrictions: ${dietaryRestrictions.join(", ")}`
+      : "";
+
+    const cuisineText = cuisinePreferences.length > 0
+      ? `\nPreferred cuisines: ${cuisinePreferences.join(", ")}`
+      : "";
+
+    const currentIngredientsText = currentIngredients.length > 0
+      ? `\nCurrent fridge items: ${currentIngredients.join(", ")}`
+      : "\nThe fridge is currently empty.";
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful grocery shopping assistant that creates smart shopping lists based on what users already have and their dietary preferences.",
+        },
+        {
+          role: "user",
+          content: `Create a comprehensive shopping list for a household.${currentIngredientsText}${dietaryText}${cuisineText}
+Serving size: ${servingSize} people
+
+Create a balanced shopping list that includes:
+- Essential staples they might be missing
+- Fresh produce for variety
+- Proteins appropriate for their diet
+- Pantry items for meal preparation
+- Avoid items they already have in their fridge
+
+Provide the shopping list in this JSON format:
+{
+  "items": [
+    {"name": "Item Name", "category": "Produce/Dairy/Meat/Pantry/Other", "quantity": "2 lbs/1 gallon/etc"}
+  ]
+}
+
+Only return the JSON object, nothing else.`,
+        },
+      ],
+      max_tokens: 1500,
+    });
+
+    const content = response.choices[0].message.content;
+
+    // Extract JSON from response
+    const jsonMatch = content.match(/\{.*\}/s);
+    if (jsonMatch) {
+      const shoppingList = JSON.parse(jsonMatch[0]);
+      return {success: true, items: shoppingList.items};
+    }
+
+    throw new HttpsError(
+      "internal",
+      "Failed to parse OpenAI response"
+    );
+  } catch (error) {
+    console.error("Error generating shopping list:", error);
+    throw new HttpsError(
+      "internal",
+      `OpenAI API error: ${error.message}`
+    );
+  }
+});

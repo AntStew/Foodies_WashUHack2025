@@ -7,6 +7,8 @@ import '../../services/storage_service.dart';
 import '../../services/openai_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/fridge_item_model.dart';
+import '../../models/shopping_list_item_model.dart';
+import '../../models/user_model.dart';
 
 class FridgeScanScreen extends StatefulWidget {
   const FridgeScanScreen({super.key});
@@ -26,6 +28,49 @@ class _FridgeScanScreenState extends State<FridgeScanScreen> {
   XFile? _pickedFile;
   bool _isProcessing = false;
   String _statusMessage = '';
+
+  Future<void> _generateShoppingList(user, List<Map<String, String>> fridgeItems) async {
+    try {
+      // Get user profile for preferences
+      final userProfile = await _firestoreService.getUserProfile(user.uid);
+
+      final dietaryRestrictions = userProfile?.dietaryRestrictions ?? [];
+      final cuisinePreferences = userProfile?.cuisinePreferences ?? [];
+      final servingSize = userProfile?.servingSize ?? 2;
+
+      // Get current ingredient names
+      final currentIngredients = fridgeItems.map((item) => item['name']!).toList();
+
+      // Generate shopping list with AI
+      final shoppingListItems = await _openAiService.generateShoppingList(
+        currentIngredients,
+        dietaryRestrictions,
+        cuisinePreferences,
+        servingSize,
+      );
+
+      if (shoppingListItems.isNotEmpty) {
+        // Convert to ShoppingListItem models
+        final now = DateTime.now();
+        final items = shoppingListItems.map((itemData) {
+          return ShoppingListItem(
+            id: '',
+            name: itemData['name']!,
+            category: itemData['category']!,
+            quantity: itemData['quantity']!,
+            isChecked: false,
+            createdAt: now,
+          );
+        }).toList();
+
+        // Save to Firestore
+        await _firestoreService.addMultipleShoppingListItems(user.uid, items);
+      }
+    } catch (e) {
+      // Silent fail for shopping list generation - don't block the main flow
+      debugPrint('Error generating shopping list: $e');
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -100,9 +145,16 @@ class _FridgeScanScreenState extends State<FridgeScanScreen> {
         await _firestoreService.addFridgeItem(user.uid, item);
       }
 
+      // Generate shopping list
+      setState(() {
+        _statusMessage = 'Generating shopping list...';
+      });
+
+      await _generateShoppingList(user, items);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Successfully added ${items.length} items!')),
+          SnackBar(content: Text('Successfully added ${items.length} items and generated shopping list!')),
         );
         Navigator.pop(context);
       }

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 import '../models/fridge_item_model.dart';
 import '../models/recipe_model.dart';
+import '../models/shopping_list_item_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -139,5 +140,90 @@ class FirestoreService {
         .collection('recipes')
         .doc(recipeId)
         .update({'isFavorite': isFavorite});
+  }
+
+  // Shopping List Operations
+  Stream<List<ShoppingListItem>> getShoppingList(String uid) {
+    return _db
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => ShoppingListItem.fromMap(doc.id, doc.data()))
+            .toList());
+  }
+
+  Future<void> addShoppingListItem(String uid, ShoppingListItem item) async {
+    await _db
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .add(item.toMap());
+  }
+
+  Future<void> addMultipleShoppingListItems(String uid, List<ShoppingListItem> items) async {
+    final batch = _db.batch();
+
+    for (var item in items) {
+      final docRef = _db
+          .collection('users')
+          .doc(uid)
+          .collection('shoppingList')
+          .doc();
+      batch.set(docRef, item.toMap());
+    }
+
+    await batch.commit();
+  }
+
+  Future<void> toggleShoppingListItem(String uid, String itemId, bool isChecked) async {
+    await _db
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .doc(itemId)
+        .update({'isChecked': isChecked});
+  }
+
+  Future<void> deleteShoppingListItem(String uid, String itemId) async {
+    await _db
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .doc(itemId)
+        .delete();
+  }
+
+  Future<void> clearShoppingList(String uid) async {
+    final batch = _db.batch();
+    final items = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .get();
+
+    for (var doc in items.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
+  }
+
+  Future<void> clearCheckedItems(String uid) async {
+    final batch = _db.batch();
+    final items = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('shoppingList')
+        .where('isChecked', isEqualTo: true)
+        .get();
+
+    for (var doc in items.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
   }
 }

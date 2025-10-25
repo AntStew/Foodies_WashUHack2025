@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/fridge_item_model.dart';
-import 'widgets/action_buttons_widget.dart';
-import 'widgets/search_bar_widget.dart';
 import 'widgets/category_section_widget.dart';
 import 'widgets/empty_state_widget.dart';
 import 'widgets/no_results_widget.dart';
@@ -34,19 +32,84 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text(
-          'My Fridge',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3748),
-          ),
-        ),
         backgroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
+        title: Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 45,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search ingredients...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: Colors.grey[600],
+                      size: 20,
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.clear_rounded,
+                              color: Colors.grey[600],
+                              size: 18,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _isSearching = false;
+                              });
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _isSearching = value.isNotEmpty;
+                    });
+                  },
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.bookmark_rounded, color: Color(0xFF667eea)),
+            tooltip: 'Saved Recipes',
+            onPressed: () {
+              Navigator.pushNamed(context, '/saved-recipes');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF667eea)),
+            tooltip: 'Shopping List',
+            onPressed: () {
+              Navigator.pushNamed(context, '/shopping-list');
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout, color: Color(0xFF718096)),
+            tooltip: 'Sign Out',
             onPressed: () async {
               await _authService.signOut();
               if (!mounted) return;
@@ -66,19 +129,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             )
-          : Stack(
+          : Column(
               children: [
-                // Main Content
-                Column(
-                  children: [
-                    // Action Buttons
-                    const ActionButtonsWidget(),
+                // Fridge Items Display
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isDesktop = constraints.maxWidth > 800;
 
-                    const SizedBox(height: 100), // Space for floating search bar
-
-                    // Fridge Items Display
-                    Expanded(
-                      child: StreamBuilder<List<FridgeItem>>(
+                      return StreamBuilder<List<FridgeItem>>(
                         stream: _firestoreService.getFridgeItems(user.uid),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -156,7 +215,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             });
 
                           return ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.only(
+                              left: isDesktop ? 32 : 16,
+                              right: isDesktop ? 32 : 16,
+                              top: 16,
+                              bottom: 100, // Add padding for fixed bottom bar
+                            ),
                             itemCount: sortedCategories.length,
                             itemBuilder: (context, index) {
                               final category = sortedCategories[index];
@@ -169,34 +233,103 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                           );
                         },
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
 
-                // Floating Search Bar
-                Positioned(
-                  top: 120,
-                  left: 16,
-                  right: 16,
-                  child: SearchBarWidget(
-                    controller: _searchController,
-                    isSearching: _isSearching,
-                    onChanged: (value) {
-                      setState(() {
-                        _isSearching = value.isNotEmpty;
-                      });
+                // Fixed Bottom Action Bar
+                _buildBottomActionBar(context, user),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildBottomActionBar(BuildContext context, user) {
+    return StreamBuilder<List<FridgeItem>>(
+      stream: _firestoreService.getFridgeItems(user.uid),
+      builder: (context, snapshot) {
+        final items = snapshot.data ?? [];
+        final hasItems = items.isNotEmpty;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: SafeArea(
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/scan-fridge');
                     },
-                    onClear: () {
-                      setState(() {
-                        _searchController.clear();
-                        _isSearching = false;
-                      });
-                    },
+                    icon: Icon(
+                      hasItems ? Icons.refresh : Icons.camera_alt_rounded,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      hasItems ? 'Rescan Fridge' : 'Scan Fridge',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF667eea),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: hasItems
+                        ? () {
+                            Navigator.pushNamed(context, '/generate-recipe');
+                          }
+                        : null,
+                    icon: const Icon(
+                      Icons.restaurant_menu_rounded,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      'Generate Recipe',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF764ba2),
+                      disabledBackgroundColor: Colors.grey[300],
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
+        );
+      },
     );
   }
 

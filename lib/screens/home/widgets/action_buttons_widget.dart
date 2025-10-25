@@ -5,65 +5,119 @@ class ActionButtonsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 800;
+
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 32 : 16,
+            vertical: 16,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionButton(
-                  icon: Icons.camera_alt_rounded,
-                  label: 'Scan Fridge',
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/scan-fridge');
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionButton(
-                  icon: Icons.restaurant_menu_rounded,
-                  label: 'Generate Recipe',
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/generate-recipe');
-                  },
-                ),
+          padding: EdgeInsets.all(isDesktop ? 32 : 24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: _buildActionButton(
-              icon: Icons.bookmark_rounded,
-              label: 'Saved Recipes',
-              color: Colors.white,
-              onPressed: () {
-                Navigator.pushNamed(context, '/saved-recipes');
-              },
-            ),
+          child: isDesktop
+              ? _buildDesktopLayout(context)
+              : _buildMobileLayout(context),
+        );
+      },
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.camera_alt_rounded,
+            label: 'Scan Fridge',
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pushNamed(context, '/scan-fridge');
+            },
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.restaurant_menu_rounded,
+            label: 'Generate Recipe',
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pushNamed(context, '/generate-recipe');
+            },
+          ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.bookmark_rounded,
+            label: 'Saved Recipes',
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pushNamed(context, '/saved-recipes');
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.camera_alt_rounded,
+                label: 'Scan Fridge',
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/scan-fridge');
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.restaurant_menu_rounded,
+                label: 'Generate Recipe',
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/generate-recipe');
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: _buildActionButton(
+            icon: Icons.bookmark_rounded,
+            label: 'Saved Recipes',
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pushNamed(context, '/saved-recipes');
+            },
+          ),
+        ),
+      ],
     );
   }
 
