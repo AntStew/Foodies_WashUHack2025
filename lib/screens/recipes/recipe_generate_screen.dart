@@ -4,7 +4,7 @@ import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/openai_service.dart';
 import '../../models/recipe_model.dart';
-import 'package:sticky_headers/sticky_headers.dart';
+
 
 class RecipeGenerateScreen extends StatefulWidget {
   const RecipeGenerateScreen({super.key});
