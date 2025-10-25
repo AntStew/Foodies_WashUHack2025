@@ -1,8 +1,50 @@
+import { useState } from "react";
 import { Button } from "./components/ui/button";
 import { Card, CardContent } from "./components/ui/card";
 import { Camera, Sparkles, Recycle, ChefHat } from "lucide-react";
+import Questionnaire from "./components/Questionnaire";
+
+type View = "landing" | "questionnaire" | "dashboard";
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<View>("landing");
+  const [userAnswers, setUserAnswers] = useState(null);
+
+  const handleQuestionnaireComplete = (answers: any) => {
+    setUserAnswers(answers);
+    setCurrentView("dashboard");
+  };
+
+  // Show questionnaire view
+  if (currentView === "questionnaire") {
+    return <Questionnaire onComplete={handleQuestionnaireComplete} />;
+  }
+
+  // Show dashboard/success view
+  if (currentView === "dashboard") {
+    return (
+      <div className="min-h-screen bg-[#FFF8DC] flex items-center justify-center p-8">
+        <div className="max-w-2xl text-center space-y-6">
+          <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#E74C3C] to-[#E67E22] flex items-center justify-center shadow-lg">
+            <ChefHat className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-5xl text-[#2C3E50]">Welcome to Your Kitchen!</h1>
+          <p className="text-xl text-[#2C3E50]/70">
+            Your personalized cooking experience is ready. Let's start creating amazing meals!
+          </p>
+          <Button
+            size="lg"
+            className="h-16 px-12 bg-gradient-to-r from-[#E74C3C] to-[#E67E22] hover:from-[#E74C3C]/90 hover:to-[#E67E22]/90 text-white shadow-lg"
+            onClick={() => setCurrentView("landing")}
+          >
+            <span className="text-xl">📸 Scan My Fridge</span>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Landing page view
   return (
     <div className="min-h-screen bg-[#FFF8DC]">
       {/* Hero Section */}
@@ -63,6 +105,7 @@ export default function App() {
                   <div className="space-y-4 pt-4">
                     <Button 
                       size="lg"
+                      onClick={() => setCurrentView("questionnaire")}
                       className="w-full h-16 bg-gradient-to-r from-[#E74C3C] to-[#E67E22] hover:from-[#E74C3C]/90 hover:to-[#E67E22]/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                     >
                       <span className="text-xl">🍳 Start Cooking Smart</span>
@@ -265,6 +308,7 @@ export default function App() {
           </p>
           <Button 
             size="lg"
+            onClick={() => setCurrentView("questionnaire")}
             className="h-16 px-12 bg-white text-[#E74C3C] hover:bg-[#FFF8DC] shadow-2xl hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <span className="text-2xl">🚀 Get Started Free</span>
