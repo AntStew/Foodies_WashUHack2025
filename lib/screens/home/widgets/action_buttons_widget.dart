@@ -42,7 +42,7 @@ class ActionButtonsWidget extends StatelessWidget {
   Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       children: [
-        Expanded(
+        Expanded( 
           child: _buildActionButton(
             icon: Icons.camera_alt_rounded,
             label: 'Scan Fridge',

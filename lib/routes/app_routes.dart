@@ -19,7 +19,7 @@ class AppRoutes {
   static const String generateRecipe = '/generate-recipe';
   static const String savedRecipes = '/saved-recipes';
   static const recipeDetail = '/recipe_detail';
-  static const recipeGenerate = '/recipe_generate';
+  static const recipeGenerate = '/recipe_generate'; 
   static const fridgeScan = '/fridge_scan';
   static const shoppingList = '/shopping-list';
 

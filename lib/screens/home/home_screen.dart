@@ -300,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton.icon(
                     onPressed: hasItems
                         ? () {
-                            Navigator.pushNamed(context, '/generate-recipe');
+                            Navigator.pushNamed(context, '/recipe_generate');
                           }
                         : null,
                     icon: const Icon(
