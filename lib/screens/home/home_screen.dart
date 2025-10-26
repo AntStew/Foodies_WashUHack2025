@@ -13,7 +13,6 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
   final _firestoreService = FirestoreService();
@@ -30,219 +29,248 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = _authService.currentUser;
 
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Not logged in',
+            style: TextStyle(fontSize: 16, color: Color(0xFF718096)),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
-        title: Row(
+      body: SafeArea(
+        child: Column(
           children: [
             Expanded(
-              child: Container(
-                height: 45,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search ingredients...',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 14,
+              child: CustomScrollView(
+                slivers: [
+                  // ===== Gradient AppBar (pinned) =====
+                  SliverAppBar(
+                    pinned: true,
+                    floating: false,
+                    snap: false,
+                    elevation: 0,
+                    backgroundColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    automaticallyImplyLeading: false,
+                    toolbarHeight: 110,
+                    flexibleSpace: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color.fromARGB(255, 209, 38, 38),
+                            Color.fromARGB(183, 255, 124, 30),
+                            Color.fromARGB(0, 255, 255, 255),
+                          ],
+                        ),
+                      ),
                     ),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: Colors.grey[600],
-                      size: 20,
-                    ),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.clear_rounded,
-                              color: Colors.grey[600],
-                              size: 18,
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 45,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _searchController.clear();
-                                _isSearching = false;
-                              });
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _isSearching = value.isNotEmpty;
-                    });
-                  },
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_rounded, color: Color(0xFF667eea)),
-            tooltip: 'Saved Recipes',
-            onPressed: () {
-              Navigator.pushNamed(context, '/saved-recipes');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF667eea)),
-            tooltip: 'Shopping List',
-            onPressed: () {
-              Navigator.pushNamed(context, '/shopping-list');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Color(0xFF718096)),
-            tooltip: 'Sign Out',
-            onPressed: () async {
-              await _authService.signOut();
-              if (!mounted) return;
-              // ignore: use_build_context_synchronously
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-          ),
-        ],
-      ),
-      body: user == null
-          ? const Center(
-              child: Text(
-                'Not logged in',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF718096),
-                ),
-              ),
-            )
-          : Column(
-              children: [
-                // Fridge Items Display
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isDesktop = constraints.maxWidth > 800;
-
-                      return StreamBuilder<List<FridgeItem>>(
-                        stream: _firestoreService.getFridgeItems(user.uid),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF667eea),
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search ingredients...',
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 14,
                                 ),
+                                prefixIcon: Icon(
+                                  Icons.search_rounded,
+                                  color: Colors.grey[600],
+                                  size: 20,
+                                ),
+                                suffixIcon: _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: Icon(
+                                          Icons.clear_rounded,
+                                          color: Colors.grey[600],
+                                          size: 18,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _searchController.clear();
+                                            _isSearching = false;
+                                          });
+                                        },
+                                      )
+                                    : null,
+                                border: InputBorder.none,
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                               ),
-                            );
-                          }
+                              onChanged: (value) {
+                                setState(() {
+                                  _isSearching = value.isNotEmpty;
+                                });
+                              },
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.bookmark_rounded, color: Colors.black),
+                        tooltip: 'Saved Recipes',
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/saved-recipes');
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
+                        tooltip: 'Shopping List',
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/shopping-list');
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.black),
+                        tooltip: 'Sign Out',
+                        onPressed: () async {
+                          await _authService.signOut();
+                          if (!mounted) return;
+                          Navigator.pushReplacementNamed(context, '/login');
+                        },
+                      ),
+                    ],
+                  ),
 
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 64,
-                                    color: Colors.red[300],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Error: ${snapshot.error}',
-                                    style: const TextStyle(
-                                      color: Color(0xFF718096),
-                                      fontSize: 16,
+                  // ===== Scrollable Fridge Content with Fade Mask =====
+                  SliverToBoxAdapter(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isDesktop = constraints.maxWidth > 800;
+
+                        return StreamBuilder<List<FridgeItem>>(
+                          stream: _firestoreService.getFridgeItems(user.uid),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 60),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Color(0xFF667eea),
                                     ),
                                   ),
-                                ],
+                                ),
+                              );
+                            }
+
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Error: ${snapshot.error}',
+                                      style: const TextStyle(
+                                        color: Color(0xFF718096),
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            final items = snapshot.data ?? [];
+                            if (items.isEmpty) return const EmptyStateWidget();
+
+                            // Filter and group items
+                            final filteredItems = items.where((item) {
+                              return !_isSearching ||
+                                  item.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                            }).toList();
+
+                            if (filteredItems.isEmpty) return const NoResultsWidget();
+
+                            final groupedItems = <String, List<FridgeItem>>{};
+                            for (final item in filteredItems) {
+                              groupedItems.putIfAbsent(item.category, () => []).add(item);
+                            }
+
+                            final sortedCategories = groupedItems.keys.toList()
+                              ..sort((a, b) {
+                                final aPriority = _getCategoryPriority(a);
+                                final bPriority = _getCategoryPriority(b);
+                                return aPriority != bPriority
+                                    ? aPriority.compareTo(bPriority)
+                                    : a.compareTo(b);
+                              });
+
+                            // 🌈 Fade illusion with top + bottom fade
+                            return ShaderMask(
+                              shaderCallback: (Rect bounds) {
+                                return const LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent, // fade out at top
+                                    Colors.black,       // fully visible middle
+                                    Colors.black,       // fully visible middle
+                                    Colors.transparent, // fade out at bottom
+                                  ],
+                                  stops: [0.0, 0.08, 0.92, 1.0],
+                                ).createShader(bounds);
+                              },
+                              blendMode: BlendMode.dstIn,
+                              child: ListView.builder(
+                                padding: EdgeInsets.only(
+                                  left: isDesktop ? 32 : 16,
+                                  right: isDesktop ? 32 : 16,
+                                  top: 16,
+                                  bottom: 100,
+                                ),
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: sortedCategories.length,
+                                itemBuilder: (context, index) {
+                                  final category = sortedCategories[index];
+                                  final categoryItems = groupedItems[category]!;
+                                  return CategorySectionWidget(
+                                    category: category,
+                                    items: categoryItems,
+                                    onDeleteItem: (item) =>
+                                        _showDeleteItemDialog(context, item),
+                                  );
+                                },
                               ),
                             );
-                          }
-
-                          final items = snapshot.data ?? [];
-
-                          if (items.isEmpty) {
-                            return const EmptyStateWidget();
-                          }
-
-                          // Filter items based on search
-                          final filteredItems = items.where((item) {
-                            return !_isSearching ||
-                                item.name.toLowerCase().contains(_searchController.text.toLowerCase());
-                          }).toList();
-
-                          if (filteredItems.isEmpty) {
-                            return const NoResultsWidget();
-                          }
-
-                          // Group items by category
-                          final groupedItems = <String, List<FridgeItem>>{};
-                          for (final item in filteredItems) {
-                            groupedItems.putIfAbsent(item.category, () => []).add(item);
-                          }
-
-                          // Sort categories to prioritize meat, vegetables, dairy, then others
-                          final sortedCategories = groupedItems.keys.toList()
-                            ..sort((a, b) {
-                              final aLower = a.toLowerCase();
-                              final bLower = b.toLowerCase();
-
-                              // Priority order: meat, vegetables, dairy, then alphabetical, then other
-                              final aPriority = _getCategoryPriority(aLower);
-                              final bPriority = _getCategoryPriority(bLower);
-
-                              if (aPriority != bPriority) {
-                                return aPriority.compareTo(bPriority);
-                              }
-
-                              if (aLower == 'other') return 1;
-                              if (bLower == 'other') return -1;
-                              return a.compareTo(b);
-                            });
-
-                          return ListView.builder(
-                            padding: EdgeInsets.only(
-                              left: isDesktop ? 32 : 16,
-                              right: isDesktop ? 32 : 16,
-                              top: 16,
-                              bottom: 100, // Add padding for fixed bottom bar
-                            ),
-                            itemCount: sortedCategories.length,
-                            itemBuilder: (context, index) {
-                              final category = sortedCategories[index];
-                              final categoryItems = groupedItems[category]!;
-                              return CategorySectionWidget(
-                                category: category,
-                                items: categoryItems,
-                                onDeleteItem: (item) => _showDeleteItemDialog(context, item),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-
-                // Fixed Bottom Action Bar
-                _buildBottomActionBar(context, user),
-              ],
+                ],
+              ),
             ),
+
+            // ===== Fixed Bottom Action Bar =====
+            _buildBottomActionBar(context, user),
+          ],
+        ),
+      ),
     );
   }
 
@@ -299,14 +327,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: hasItems
-                        ? () {
-                            Navigator.pushNamed(context, '/recipe_generate');
-                          }
+                        ? () => Navigator.pushNamed(context, '/recipe_generate')
                         : null,
-                    icon: const Icon(
-                      Icons.restaurant_menu_rounded,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.restaurant_menu_rounded, color: Colors.white),
                     label: const Text(
                       'Generate Recipe',
                       style: TextStyle(
@@ -334,7 +357,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   int _getCategoryPriority(String category) {
     switch (category.toLowerCase()) {
       case 'meat':
@@ -352,10 +374,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'other':
         return 99;
       default:
-        return 50; // Other categories in alphabetical order
+        return 50;
     }
   }
-
 
   void _showDeleteItemDialog(BuildContext context, FridgeItem item) {
     showDialog(
@@ -379,5 +400,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 }
