@@ -150,151 +150,166 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
     return Scaffold(
       backgroundColor: _kCream,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Background (soft)
-            Positioned.fill(
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [Color(0xFFFFFAF0), Color(0xFFFFF0DC)],
-                  ),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          // Full screen background (soft)
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter, 
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFFFFAF0), Color(0xFFFFF0DC)],
                 ),
               ),
             ),
+          ),
 
-            // Content
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 800),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Top progress bar & labels
-                      _ProgressHeader(
-                        stepLabel: "Question ${_stepIndex + 1} of ${_steps.length}",
-                        progress: _progress,
-                        percentText:
-                            "${(_progress * 100).toStringAsFixed(0)}% Complete",
-                      ),
-                      const SizedBox(height: 18),
-
-                      // Title + subtitle (hero-ish)
-                      Column(
+          // Content with safe area
+          SafeArea(
+            child: Stack(
+              children: [
+                // Content
+                Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            step.title,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w800,
-                              fontSize: size.width < 600 ? 26 : 36,
-                              color: _kCharcoal,
-                            ),
+                          // Top progress bar & labels
+                          _ProgressHeader(
+                            stepLabel: "Question ${_stepIndex + 1} of ${_steps.length}",
+                            progress: _progress,
+                            percentText: "${(_progress * 100).toStringAsFixed(0)}% Complete",
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            step.subtitle,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontSize: 15,
-                            ),
+                          const SizedBox(height: 18),
+
+                          // Title + subtitle (hero-ish)
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                step.title,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: size.width < 600 ? 26 : 36,
+                                  color: _kCharcoal,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                step.subtitle,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
+                          const SizedBox(height: 26),
+
+                          // Cards grid per step
+                          _buildStepGrid(),
                         ],
                       ),
-                      const SizedBox(height: 26),
-
-                      // Cards grid per step
-                      _buildStepGrid(),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Sticky footer with Back / Skip / Next
-            Positioned(
-              left: 0, right: 0, bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(color: Color(0x1A000000), blurRadius: 14, offset: Offset(0, -6)),
-                  ],
-                ),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1100),
-                    child: Row(
-                      children: [
-                        _SoftButton(
-                          icon: Icons.chevron_left,
-                          label: 'Back',
-                          onTap: _stepIndex == 0 ? null : _back,
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: _skip,
-                          child: Text(
-                            _stepIndex == 3 ? 'Skip & Finish' : 'Skip',
-                            style: const TextStyle(color: Colors.black45)
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: _stepIndex == 3 ? 180 : 160,
-                          height: 48,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: _canProceed
-                                  ? const LinearGradient(colors: [_kEggYellow, _kTomatoRed])
-                                  : const LinearGradient(colors: [Color(0xFFE0E0E0), Color(0xFFCFCFCF)]),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: _canProceed
-                                  ? const [BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 6))]
-                                  : const [],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: (_isLoading || !_canProceed) ? null : _next,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20, height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                                    )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(_stepIndex == 3 ? 'Start Cooking' : 'Next',
-                                            style: const TextStyle(fontWeight: FontWeight.w700)),
-                                        const SizedBox(width: 6),
-                                        const Icon(Icons.chevron_right, size: 20),
-                                      ],
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-              ),
+
+                // Sticky footer with Back / Skip / Next
+                Positioned(
+                  left: 0, 
+                  right: 0, 
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x1A000000), 
+                          blurRadius: 14, 
+                          offset: Offset(0, -6)
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1100),
+                        child: Row(
+                          children: [
+                            _SoftButton(
+                              icon: Icons.chevron_left,
+                              label: 'Back',
+                              onTap: _stepIndex == 0 ? null : _back,
+                            ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: _skip,
+                              child: Text(
+                                _stepIndex == 3 ? 'Skip & Finish' : 'Skip',
+                                style: const TextStyle(color: Colors.black45),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              width: _stepIndex == 3 ? 180 : 160,
+                              height: 48,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: _canProceed
+                                      ? const LinearGradient(colors: [_kEggYellow, _kTomatoRed])
+                                      : const LinearGradient(colors: [Color(0xFFE0E0E0), Color(0xFFCFCFCF)]),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: _canProceed
+                                      ? const [BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 6))]
+                                      : const [],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: (_isLoading || !_canProceed) ? null : _next,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          width: 20, 
+                                          height: 20,
+                                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                        )
+                                      : Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              _stepIndex == 3 ? 'Start Cooking' : 'Next',
+                                              style: const TextStyle(fontWeight: FontWeight.w700),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            const Icon(Icons.chevron_right, size: 20),
+                                          ],
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

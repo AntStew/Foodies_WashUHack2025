@@ -132,10 +132,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       // no AppBar → full-bleed visual to match landing page
       body: Stack(
         children: [
-          // Background image 
+          // Full screen background image 
           Positioned.fill(
             child: Image.asset(
               'design/Assestss/3.jpeg',
@@ -143,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Warm overlay for readability (tomato → egg gradient)
+          // Full screen warm overlay for readability (tomato → egg gradient)
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -156,8 +157,9 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Form card
-          Center(
+          // Form card with safe area
+          SafeArea(
+            child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: ConstrainedBox(
@@ -381,6 +383,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],

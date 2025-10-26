@@ -13,6 +13,7 @@ class RecipeDetailScreen extends StatelessWidget {
     final isMobile = screenWidth < 600;
     
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar( 
         title: Text(recipe.title),
       ),
