@@ -56,6 +56,9 @@ dependencies:
   
   # Logging
   logger: ^2.0.2
+  
+  # Google Fonts for better character support
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +87,9 @@ flutter:
     - design/Assestss/3.jpeg
     - design/background/aisle.jpg
     - design/background/foodbg.jpg
+    - design/background/fooood.jpg
+    - design/background/fridgeerr.jpg
+    - design/background/generatebg.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

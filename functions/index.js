@@ -165,6 +165,8 @@ Only return the JSON array, nothing else.`,
  * @param {Array<string>} data.dietaryRestrictions - User's dietary restrictions
  * @param {Array<string>} data.cuisinePreferences - User's cuisine preferences
  * @param {number} data.servings - Number of servings
+ * @param {string} data.additionalContext - Additional cooking preferences/context
+ * @param {string} data.mealType - Meal type (breakfast, lunch, dinner)
  * @returns {Object} Recipe object with title, description, ingredients, instructions, etc.
  */
 exports.generateRecipe = onCall(
@@ -183,7 +185,18 @@ exports.generateRecipe = onCall(
     dietaryRestrictions = [],
     cuisinePreferences = [],
     servings = 2,
+    additionalContext = "",
+    mealType = "dinner",
   } = request.data;
+
+  // Debug logging
+  console.log("Recipe generation request received:");
+  console.log("Ingredients:", ingredients);
+  console.log("Dietary restrictions:", dietaryRestrictions);
+  console.log("Cuisine preferences:", cuisinePreferences);
+  console.log("Servings:", servings);
+  console.log("Additional context:", additionalContext);
+  console.log("Meal type:", mealType);
 
   // Validate input
   if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
@@ -207,16 +220,24 @@ exports.generateRecipe = onCall(
       ? `\nPreferred cuisines: ${cuisinePreferences.join(", ")}`
       : "";
 
+    const contextText = additionalContext.trim().length > 0
+      ? `\nAdditional context/preferences: ${additionalContext}`
+      : "";
+
+    const mealTypeText = mealType && mealType !== "dinner"
+      ? `\nMeal type: ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`
+      : "";
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a helpful chef assistant that creates recipes based on available ingredients.",
+          content: "You are a helpful chef assistant that creates recipes based on available ingredients. Consider the meal type and any additional context provided by the user to create the most appropriate recipe.",
         },
         {
           role: "user",
-          content: `Create a recipe using these ingredients: ${ingredients.join(", ")}${dietaryText}${cuisineText}
+          content: `Create a recipe using these ingredients: ${ingredients.join(", ")}${dietaryText}${cuisineText}${contextText}${mealTypeText}
 Servings: ${servings}
 
 Provide the recipe in this JSON format:

@@ -248,39 +248,28 @@ class _FridgeScanScreenState extends State<FridgeScanScreen> {
             )
           : Stack(
               children: [
-                // Background Image or Gradient
-                if (_pickedFile != null)
-                  Positioned.fill(
-                    child: kIsWeb
-                        ? Image.network(
-                            _pickedFile!.path,
-                            fit: BoxFit.cover,
-                          )
-                        : _imageFile != null
-                            ? Image.file(
-                                _imageFile!,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.white, Colors.grey],
-                                  ),
-                                ),
-                              ),
-                  )
-                else
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.white, Colors.grey],
-                      ),
-                    ),
-                  ),
+                // Background Image or Fallback
+                Positioned.fill(
+                  child: _pickedFile != null
+                      ? (kIsWeb
+                          ? Image.network(
+                              _pickedFile!.path,
+                              fit: BoxFit.cover,
+                            )
+                          : _imageFile != null
+                              ? Image.file(
+                                  _imageFile!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  'design/background/fridgeerr.jpg',
+                                  fit: BoxFit.cover,
+                                ))
+                      : Image.asset(
+                          'design/background/fridgeerr.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                ),
 
                 // Content - Centered with black translucent background
                 Center(

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import '../../../models/fridge_item_model.dart';
 
 class CategorySectionWidget extends StatefulWidget {
   final List<FridgeItem> items;
   final Function(FridgeItem) onDeleteItem;
   final Function(FridgeItem) onEditItem;
+  final Function() onDeleteAll;
 
   const CategorySectionWidget({
     super.key,
     required this.items,
     required this.onDeleteItem,
     required this.onEditItem,
+    required this.onDeleteAll,
   });
 
   @override
@@ -47,26 +49,8 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(15),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+    return Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -86,59 +70,122 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
                 topRight: Radius.circular(15),
               ),
             ),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              indicator: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              dividerColor: Colors.transparent,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
-              labelStyle: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-              unselectedLabelStyle: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              tabs: _categories.map((category) {
-                final categoryItems = _getItemsForCategory(category);
-                return Tab(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(_getCategoryDisplayName(category)),
-                        if (categoryItems.isNotEmpty) ...[
-                          const SizedBox(width: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      dragDevices: {
+                        PointerDeviceKind.touch,
+                        PointerDeviceKind.mouse,
+                      },
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      indicator: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
+                      labelStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      tabs: _categories.map((category) {
+                        final categoryItems = _getItemsForCategory(category);
+                        return Tab(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
                             ),
-                            child: Text(
-                              '${categoryItems.length}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(_getCategoryDisplayName(category)),
+                                if (categoryItems.isNotEmpty) ...[
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      '${categoryItems.length}',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                        ],
-                      ],
+                        );
+                      }).toList(),
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+                // Delete All Button
+                if (widget.items.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: _showDeleteAllDialog,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.delete_sweep_outlined,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'Delete All',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          
+
           // Tab Content
           Expanded(
             child: TabBarView(
@@ -150,8 +197,6 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
             ),
           ),
         ],
-      ),
-        ),
       ),
     );
   }
@@ -166,14 +211,14 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
             Icon(
               _getCategoryIcon(category),
               size: 48,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Colors.grey.withValues(alpha: 0.6),
             ),
             const SizedBox(height: 16),
             Text(
               'No ${_getCategoryDisplayName(category).toLowerCase()} items',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: Colors.grey.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -182,7 +227,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
               'Add items to your fridge to see them here',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.grey.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -192,32 +237,51 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return _buildListItem(item);
-        },
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
+        ),
+        child: ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return _buildListItem(item);
+          },
+        ),
       ),
     );
   }
 
   Widget _buildListItem(FridgeItem item) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1,
-            ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.black,
+            Colors.grey[900]!,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+            spreadRadius: 1,
           ),
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.1),
+            blurRadius: 2,
+            offset: const Offset(0, -1),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
       child: Row(
         children: [
           // Category Icon
@@ -237,7 +301,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Item Details
           Expanded(
             child: Column(
@@ -256,10 +320,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
                   children: [
                     Text(
                       'Quantity: ${item.quantity}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[300]),
                     ),
                     if (item.expiryDate != null) ...[
                       const SizedBox(width: 16),
@@ -267,7 +328,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
                         'Expires: ${_formatDate(item.expiryDate!)}',
                         style: TextStyle(
                           fontSize: 14,
-                          color: _getExpiryColor(item.expiryDate!),
+                          color: _getExpiryColor(item.expiryDate!).withValues(alpha: 0.8),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -277,15 +338,12 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
                 const SizedBox(height: 4),
                 Text(
                   'Added: ${_formatDate(item.addedDate)}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[400]),
                 ),
               ],
             ),
           ),
-          
+
           // Action Buttons
           Row(
             children: [
@@ -326,8 +384,6 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
           ),
         ],
       ),
-        ),
-      ),
     );
   }
 
@@ -335,9 +391,9 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
     if (category == 'all') {
       return widget.items;
     }
-    return widget.items.where((item) => 
-      item.category.toLowerCase() == category.toLowerCase()
-    ).toList();
+    return widget.items
+        .where((item) => item.category.toLowerCase() == category.toLowerCase())
+        .toList();
   }
 
   String _getCategoryDisplayName(String category) {
@@ -389,7 +445,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = date.difference(now).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -406,7 +462,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
   Color _getExpiryColor(DateTime expiryDate) {
     final now = DateTime.now();
     final difference = expiryDate.difference(now).inDays;
-    
+
     if (difference < 0) {
       return Colors.red;
     } else if (difference <= 2) {
@@ -435,5 +491,37 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
       default:
         return const LinearGradient(colors: [Colors.grey, Colors.blueGrey]);
     }
+  }
+
+  void _showDeleteAllDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_outlined, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Delete All Items'),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete all ${widget.items.length} items from your fridge? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              widget.onDeleteAll();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete All'),
+          ),
+        ],
+      ),
+    );
   }
 }

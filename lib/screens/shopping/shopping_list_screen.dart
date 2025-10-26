@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/openai_service.dart';
@@ -22,11 +23,28 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   final _openAIService = OpenAIService();
   bool _isGenerating = false;
   List<Map<String, dynamic>> _suggestedStores = [];
+  bool _hasTimedOut = false;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
     super.initState();
     _loadSuggestedStores();
+    
+    // Set up timeout timer
+    _timeoutTimer = Timer(const Duration(seconds: 20), () {
+      if (mounted) {
+        setState(() {
+          _hasTimedOut = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timeoutTimer?.cancel();
+    super.dispose();
   }
 
   void _loadSuggestedStores() async {
@@ -34,8 +52,11 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     if (user == null) return;
 
     try {
-      // Get stores once instead of listening to stream
-      final storesSnapshot = await _firestoreService.getSuggestedStores(user.uid).first;
+      // Get stores once with timeout to prevent freezing
+      final storesSnapshot = await _firestoreService
+          .getSuggestedStores(user.uid)
+          .first
+          .timeout(const Duration(seconds: 5));
 
       if (!mounted) return;
       setState(() {
@@ -48,6 +69,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     } catch (e) {
       // Don't crash if stores can't load, just show empty
       // Error is silently ignored as suggested stores are optional
+      if (!mounted) return;
+      setState(() {
+        _suggestedStores = [];
+      });
     }
   }
 
@@ -145,8 +170,63 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                      ),
                    )
                  : StreamBuilder<List<ShoppingListItem>>(
-                     stream: _firestoreService.getShoppingList(user.uid),
+                     stream: _firestoreService.getShoppingList(user.uid).timeout(
+                       const Duration(seconds: 15),
+                       onTimeout: (eventSink) {
+                         eventSink.addError('Shopping list loading timed out');
+                         eventSink.close();
+                       },
+                     ),
                      builder: (context, snapshot) {
+                       // Check for timeout first
+                       if (_hasTimedOut) {
+                         return Center(
+                           child: Column(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               Icon(
+                                 Icons.timer_off,
+                                 size: 64,
+                                 color: Colors.orange[300],
+                               ),
+                               const SizedBox(height: 16),
+                               const Text(
+                                 'Loading timed out',
+                                 style: TextStyle(
+                                   color: Color(0xFF718096),
+                                   fontSize: 18,
+                                   fontWeight: FontWeight.w600,
+                                 ),
+                               ),
+                               const SizedBox(height: 8),
+                               const Text(
+                                 'Please check your connection and try again',
+                                 style: TextStyle(
+                                   color: Color(0xFF718096),
+                                   fontSize: 14,
+                                 ),
+                               ),
+                               const SizedBox(height: 16),
+                               ElevatedButton(
+                                 onPressed: () {
+                                   setState(() {
+                                     _hasTimedOut = false;
+                                   });
+                                   _timeoutTimer = Timer(const Duration(seconds: 20), () {
+                                     if (mounted) {
+                                       setState(() {
+                                         _hasTimedOut = true;
+                                       });
+                                     }
+                                   });
+                                 },
+                                 child: const Text('Retry'),
+                               ),
+                             ],
+                           ),
+                         );
+                       }
+
                        if (snapshot.connectionState == ConnectionState.waiting) {
                          return const Center(
                            child: CircularProgressIndicator(
@@ -181,6 +261,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                        }
 
                        final items = snapshot.data ?? [];
+
+                       // Cancel timeout timer since we received data
+                       _timeoutTimer?.cancel();
 
                        if (items.isEmpty) {
                          return const EmptyStateWidget();
@@ -255,23 +338,29 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         // Shopping List (Left side)
         Expanded(
           flex: 2,
-          child: ScrollbarTheme(
-            data: ScrollbarThemeData(
-              thumbVisibility: WidgetStateProperty.all(false),
-              trackVisibility: WidgetStateProperty.all(false),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
             ),
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                final categoryItems = groupedItems[category]!;
-                return CategorySectionWidget(
-                  category: category,
-                  items: categoryItems,
-                  userId: userId,
-                );
-              },
+            child: ScrollbarTheme(
+              data: ScrollbarThemeData(
+                thumbVisibility: WidgetStateProperty.all(false),
+                trackVisibility: WidgetStateProperty.all(false),
+              ),
+              child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  final categoryItems = groupedItems[category]!;
+                  return CategorySectionWidget(
+                    category: category,
+                    items: categoryItems,
+                    userId: userId,
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -291,14 +380,19 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   }
 
   Widget _buildMobileLayout(List<String> categories, Map<String, List<ShoppingListItem>> groupedItems, String userId) {
-    return ScrollbarTheme(
-      data: ScrollbarThemeData(
-        thumbVisibility: WidgetStateProperty.all(false),
-        trackVisibility: WidgetStateProperty.all(false),
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
       ),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      child: ScrollbarTheme(
+        data: ScrollbarThemeData(
+          thumbVisibility: WidgetStateProperty.all(false),
+          trackVisibility: WidgetStateProperty.all(false),
+        ),
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
           // Suggested Stores at top for mobile
           if (_suggestedStores.isNotEmpty) ...[
             StoreSuggestionsWidget(
@@ -318,6 +412,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             );
           }),
         ],
+        ),
       ),
     );
   }

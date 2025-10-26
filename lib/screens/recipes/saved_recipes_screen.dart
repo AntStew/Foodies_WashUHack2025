@@ -1170,10 +1170,13 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          margin: EdgeInsets.symmetric(
+            horizontal: 16, 
+            vertical: MediaQuery.of(context).size.height * 0.1,
+          ),
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.8,
-            maxWidth: 500,
+            maxWidth: MediaQuery.of(context).size.width > 600 ? 500 : MediaQuery.of(context).size.width - 32,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
@@ -1198,13 +1201,19 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                     width: 1,
                   ),
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                       // Recipe Image
                       Container(
-                        height: 200,
+                        height: MediaQuery.of(context).size.height < 600 ? 150 : 200,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: const BorderRadius.only(
@@ -1239,7 +1248,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                               recipe.title,
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 24,
+                                fontSize: MediaQuery.of(context).size.height < 600 ? 20 : 24,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -1269,7 +1278,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                               'Ingredients',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 18,
+                                fontSize: MediaQuery.of(context).size.height < 600 ? 16 : 18,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -1304,7 +1313,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                               'Instructions',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 18,
+                                fontSize: MediaQuery.of(context).size.height < 600 ? 16 : 18,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -1377,6 +1386,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                         ),
                       ),
                     ],
+                  ),
                   ),
                 ),
               ),

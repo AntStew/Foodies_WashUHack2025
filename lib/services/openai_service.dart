@@ -32,15 +32,28 @@ class OpenAIService {
     List<String> ingredients,
     List<String> dietaryRestrictions,
     List<String> cuisinePreferences,
-    int servings,
-  ) async {
+    int servings, {
+    String? additionalContext,
+    String? mealType,
+  }) async {
     try {
+      // Debug logging
+      AppLogger.info('Generating recipe with parameters:');
+      AppLogger.info('Ingredients: $ingredients');
+      AppLogger.info('Dietary restrictions: $dietaryRestrictions');
+      AppLogger.info('Cuisine preferences: $cuisinePreferences');
+      AppLogger.info('Servings: $servings');
+      AppLogger.info('Additional context: "$additionalContext"');
+      AppLogger.info('Meal type: "$mealType"');
+      
       final callable = _functions.httpsCallable('generateRecipe');
       final result = await callable.call({
         'ingredients': ingredients,
         'dietaryRestrictions': dietaryRestrictions,
         'cuisinePreferences': cuisinePreferences,
         'servings': servings,
+        'additionalContext': additionalContext ?? '',
+        'mealType': mealType ?? 'dinner',
       });
 
       if (result.data['success'] == true) {

@@ -9,12 +9,16 @@ class RecipeDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    
     return Scaffold(
       appBar: AppBar( 
         title: Text(recipe.title),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -25,17 +29,17 @@ class RecipeDetailScreen extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: recipe.imageUrl!,
                   width: double.infinity,
-                  height: 200,
+                  height: isMobile ? 180 : 200,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
-                    height: 200,
+                    height: isMobile ? 180 : 200,
                     color: Colors.grey[300],
                     child: const Center(
                       child: CircularProgressIndicator(),
                     ),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    height: 200,
+                    height: isMobile ? 180 : 200,
                     color: Colors.grey[300],
                     child: const Center(
                       child: Icon(Icons.error, size: 50),
@@ -47,8 +51,8 @@ class RecipeDetailScreen extends StatelessWidget {
             ],
             Text(
               recipe.title,
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: isMobile ? 20 : 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -68,10 +72,10 @@ class RecipeDetailScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Ingredients',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: isMobile ? 18 : 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -87,10 +91,10 @@ class RecipeDetailScreen extends StatelessWidget {
                   ),
                 )),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Instructions',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: isMobile ? 18 : 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -115,10 +119,10 @@ class RecipeDetailScreen extends StatelessWidget {
             }),
             if (recipe.usedIngredients.isNotEmpty) ...[
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Used from Your Fridge',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: isMobile ? 18 : 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
