@@ -81,13 +81,26 @@ class FirestoreService {
   // Fridge Item Operations
   Stream<List<FridgeItem>> getFridgeItems(String uid) {
     try {
+      // Check if uid is valid
+      if (uid.isEmpty) {
+        AppLogger.error('Cannot get fridge items: User ID is empty');
+        return Stream.value(<FridgeItem>[]);
+      }
+
       return _db
           .collection('users')
           .doc(uid)
           .collection('fridgeItems')
           .limit(100)
           .snapshots()
-          .timeout(const Duration(seconds: 10))
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: (eventSink) {
+              AppLogger.error('Fridge items stream timeout after 30 seconds');
+              eventSink.addError('Fridge items stream timeout');
+              eventSink.close();
+            },
+          )
           .map(_processFridgeItemsSnapshot)
           .handleError(_handleFridgeItemsError);
     } catch (e) {
@@ -116,7 +129,11 @@ class FirestoreService {
 
   List<FridgeItem> _handleFridgeItemsError(dynamic error) {
     if (error.toString().contains('TimeoutException')) {
-      AppLogger.error('Fridge items stream timeout: Network connection may be slow or unavailable');
+      AppLogger.error('Fridge items stream timeout: Network connection may be slow or unavailable. Retrying...');
+    } else if (error.toString().contains('permission-denied')) {
+      AppLogger.error('Fridge items stream error: Permission denied. User may not be authenticated.');
+    } else if (error.toString().contains('unavailable')) {
+      AppLogger.error('Fridge items stream error: Firestore service is temporarily unavailable.');
     } else {
       AppLogger.error('Fridge items stream error: $error');
     }
