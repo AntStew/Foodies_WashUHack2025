@@ -55,7 +55,7 @@ class OpenAIService {
   }
 
   // Generate shopping list based on current fridge contents using Cloud Function
-  Future<List<Map<String, String>>> generateShoppingList(
+  Future<Map<String, dynamic>> generateShoppingList(
     List<String> currentIngredients,
     List<String> dietaryRestrictions,
     List<String> cuisinePreferences,
@@ -72,17 +72,26 @@ class OpenAIService {
 
       if (result.data['success'] == true) {
         final items = result.data['items'] as List;
-        return items.map((item) => {
-          'name': item['name'] as String,
-          'category': item['category'] as String,
-          'quantity': item['quantity'] as String,
-        }).toList();
+        final stores = result.data['suggestedStores'] as List? ?? [];
+
+        return {
+          'items': items.map((item) => {
+            'name': item['name'] as String,
+            'category': item['category'] as String,
+            'quantity': item['quantity'] as String,
+          }).toList(),
+          'stores': stores.map((store) => {
+            'name': store['name'] as String,
+            'reason': store['reason'] as String,
+            'categories': List<String>.from(store['categories'] ?? []),
+          }).toList(),
+        };
       }
 
-      return [];
+      return {'items': [], 'stores': []};
     } catch (e) {
       AppLogger.error('Error generating shopping list', e);
-      return [];
+      return {'items': [], 'stores': []};
     }
   }
 }

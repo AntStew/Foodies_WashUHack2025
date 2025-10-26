@@ -42,7 +42,7 @@ class LandingPage extends StatelessWidget {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1100),
                       child: Card(
-                        color: Colors.white.withOpacity(.95),
+                        color: Colors.white.withValues(alpha: .95),
                         elevation: 14,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                         child: Padding(
@@ -251,7 +251,7 @@ class _FeatureCard extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: border.withOpacity(.25), width: 2),
+          border: Border.all(color: border.withValues(alpha: .25), width: 2),
           borderRadius: BorderRadius.circular(18),
           boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 14, offset: Offset(0, 8))],
         ),

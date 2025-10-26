@@ -339,8 +339,13 @@ Provide the shopping list in this JSON format:
 {
   "items": [
     {"name": "Item Name", "category": "Produce/Dairy/Meat/Pantry/Other", "quantity": "2 lbs/1 gallon/etc"}
+  ],
+  "suggestedStores": [
+    {"name": "Store Name", "reason": "Why this store is good for these items", "categories": ["Produce", "Dairy"]}
   ]
 }
+
+Suggest 3-4 stores that would be good for buying these items. Consider variety (farmers market, grocery store, specialty store, bulk store).
 
 Only return the JSON object, nothing else.`,
         },
@@ -354,7 +359,11 @@ Only return the JSON object, nothing else.`,
     const jsonMatch = content.match(/\{.*\}/s);
     if (jsonMatch) {
       const shoppingList = JSON.parse(jsonMatch[0]);
-      return {success: true, items: shoppingList.items};
+      return {
+        success: true,
+        items: shoppingList.items,
+        suggestedStores: shoppingList.suggestedStores || [],
+      };
     }
 
     throw new HttpsError(

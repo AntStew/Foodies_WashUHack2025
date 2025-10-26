@@ -4,6 +4,8 @@ import '../models/user_model.dart';
 import '../models/fridge_item_model.dart';
 import '../models/recipe_model.dart';
 import '../models/shopping_list_item_model.dart';
+import '../models/suggested_store_model.dart';
+import '../utils/logger.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -156,11 +158,21 @@ class FirestoreService {
   }
 
   Future<void> addShoppingListItem(String uid, ShoppingListItem item) async {
-    await _db
-        .collection('users')
-        .doc(uid)
-        .collection('shoppingList')
-        .add(item.toMap());
+    try {
+      AppLogger.info('Adding shopping list item for user: $uid');
+      AppLogger.debug('Item: ${item.name}, Category: ${item.category}, Quantity: ${item.quantity}');
+
+      await _db
+          .collection('users')
+          .doc(uid)
+          .collection('shoppingList')
+          .add(item.toMap());
+
+      AppLogger.info('Item added successfully');
+    } catch (e) {
+      AppLogger.error('Error adding shopping list item', e);
+      rethrow;
+    }
   }
 
   Future<void> addMultipleShoppingListItems(String uid, List<ShoppingListItem> items) async {
@@ -221,6 +233,67 @@ class FirestoreService {
         .get();
 
     for (var doc in items.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
+  }
+
+  // ===== Suggested Stores Methods =====
+
+  Stream<List<SuggestedStore>> getSuggestedStores(String uid) {
+    return _db
+        .collection('users')
+        .doc(uid)
+        .collection('suggestedStores')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => SuggestedStore.fromMap(doc.id, doc.data()))
+            .toList());
+  }
+
+  Future<void> saveSuggestedStores(String uid, List<Map<String, dynamic>> stores) async {
+    try {
+      AppLogger.info('Saving ${stores.length} suggested stores for user: $uid');
+
+      // Clear existing stores first
+      await clearSuggestedStores(uid);
+
+      // Add new stores
+      final batch = _db.batch();
+      final storesCollection = _db
+          .collection('users')
+          .doc(uid)
+          .collection('suggestedStores');
+
+      for (var storeData in stores) {
+        final docRef = storesCollection.doc();
+        batch.set(docRef, {
+          'name': storeData['name'] ?? '',
+          'reason': storeData['reason'] ?? '',
+          'categories': storeData['categories'] ?? [],
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+      AppLogger.info('Suggested stores saved successfully');
+    } catch (e) {
+      AppLogger.error('Error saving suggested stores', e);
+      rethrow;
+    }
+  }
+
+  Future<void> clearSuggestedStores(String uid) async {
+    final batch = _db.batch();
+    final stores = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('suggestedStores')
+        .get();
+
+    for (var doc in stores.docs) {
       batch.delete(doc.reference);
     }
 
