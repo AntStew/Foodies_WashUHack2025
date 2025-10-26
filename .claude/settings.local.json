@@ -11,7 +11,9 @@
       "Bash(firebase functions:log:*)",
       "Bash(firebase deploy:*)",
       "Bash(awk:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(flutter format:*)",
+      "Bash(dart format:*)"
     ],
     "deny": [],
     "ask": []

@@ -222,10 +222,22 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                       spacing: 8,
                       runSpacing: 6,
                       children: [
-                      Chip(label: Text('Style: ${_generatedRecipe!.cuisine.isEmpty ? "—" : _generatedRecipe!.cuisine}')),
-                      Chip(label: Text('Prep: ${_generatedRecipe!.prepTime.isEmpty ? "—" : _generatedRecipe!.prepTime}')),
-                      Chip(label: Text('Cook: ${_generatedRecipe!.cookTime.isEmpty ? "—" : _generatedRecipe!.cookTime}')),
-                      Chip(label: Text('Servings: ${_generatedRecipe!.servings}')),
+                      _HoverableRecipeChip(
+                        label: 'Style: ${_generatedRecipe!.cuisine.isEmpty ? "—" : _generatedRecipe!.cuisine}',
+                        icon: Icons.restaurant,
+                      ),
+                      _HoverableRecipeChip(
+                        label: 'Prep: ${_generatedRecipe!.prepTime.isEmpty ? "—" : _generatedRecipe!.prepTime}',
+                        icon: Icons.access_time,
+                      ),
+                      _HoverableRecipeChip(
+                        label: 'Cook: ${_generatedRecipe!.cookTime.isEmpty ? "—" : _generatedRecipe!.cookTime}',
+                        icon: Icons.timer,
+                      ),
+                      _HoverableRecipeChip(
+                        label: 'Servings: ${_generatedRecipe!.servings}',
+                        icon: Icons.people,
+                      ),
                       ],
                       ),
                       const SizedBox(height: 20),
@@ -248,20 +260,8 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                       children: _generatedRecipe!.ingredients.map((ingredient) {
                       return SizedBox(
                       width: itemWidth,
-                      child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Center(
-                        child: Text(
-                        ingredient,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
+                      child: _HoverableIngredientItem(
+                        ingredient: ingredient,
                       ),
                       );
                       }).toList(),
@@ -426,3 +426,242 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                     ); // end Scaffold
                 } // end build
                 } // end class
+
+class _HoverableIngredientItem extends StatefulWidget {
+  final String ingredient;
+
+  const _HoverableIngredientItem({
+    required this.ingredient,
+  });
+
+  @override
+  State<_HoverableIngredientItem> createState() => _HoverableIngredientItemState();
+}
+
+class _HoverableIngredientItemState extends State<_HoverableIngredientItem> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _elevationAnimation;
+  late Animation<Color?> _colorAnimation;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+    
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic),
+    );
+    _elevationAnimation = Tween<double>(begin: 0.0, end: 8.0).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic),
+    );
+    _colorAnimation = ColorTween(
+      begin: Colors.grey[100],
+      end: Colors.orange[50],
+    ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic));
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  void _onHoverEnter() {
+    setState(() {
+      _isHovered = true;
+    });
+    _hoverController.forward();
+  }
+
+  void _onHoverExit() {
+    setState(() {
+      _isHovered = false;
+    });
+    _hoverController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _onHoverEnter(),
+      onExit: (_) => _onHoverExit(),
+      child: AnimatedBuilder(
+        animation: _hoverController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _colorAnimation.value,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _isHovered ? Colors.orange.shade300 : Colors.grey.shade200,
+                  width: _isHovered ? 2 : 1,
+                ),
+                boxShadow: [
+                  if (_isHovered)
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.3 * _elevationAnimation.value / 8),
+                      blurRadius: 8 * _elevationAnimation.value / 8,
+                      offset: Offset(0, 4 * _elevationAnimation.value / 8),
+                      spreadRadius: 1 * _elevationAnimation.value / 8,
+                    ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1 * _elevationAnimation.value / 8),
+                    blurRadius: 4 * _elevationAnimation.value / 8,
+                    offset: Offset(0, 2 * _elevationAnimation.value / 8),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  widget.ingredient,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: _isHovered ? FontWeight.w600 : FontWeight.normal,
+                    color: _isHovered ? Colors.orange.shade800 : Colors.grey.shade800,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _HoverableRecipeChip extends StatefulWidget {
+  final String label;
+  final IconData icon;
+
+  const _HoverableRecipeChip({
+    required this.label,
+    required this.icon,
+  });
+
+  @override
+  State<_HoverableRecipeChip> createState() => _HoverableRecipeChipState();
+}
+
+class _HoverableRecipeChipState extends State<_HoverableRecipeChip> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _elevationAnimation;
+  late Animation<Color?> _backgroundColorAnimation;
+  late Animation<Color?> _textColorAnimation;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic),
+    );
+    _elevationAnimation = Tween<double>(begin: 0.0, end: 6.0).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic),
+    );
+    _backgroundColorAnimation = ColorTween(
+      begin: Colors.grey[200],
+      end: Colors.orange[100],
+    ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic));
+    _textColorAnimation = ColorTween(
+      begin: Colors.grey[700],
+      end: Colors.orange[800],
+    ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic));
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  void _onHoverEnter() {
+    setState(() {
+      _isHovered = true;
+    });
+    _hoverController.forward();
+  }
+
+  void _onHoverExit() {
+    setState(() {
+      _isHovered = false;
+    });
+    _hoverController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _onHoverEnter(),
+      onExit: (_) => _onHoverExit(),
+      child: AnimatedBuilder(
+        animation: _hoverController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                color: _backgroundColorAnimation.value,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _isHovered ? Colors.orange.shade300 : Colors.grey.shade300,
+                  width: _isHovered ? 1.5 : 1,
+                ),
+                boxShadow: [
+                  if (_isHovered)
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.2 * _elevationAnimation.value / 6),
+                      blurRadius: 6 * _elevationAnimation.value / 6,
+                      offset: Offset(0, 3 * _elevationAnimation.value / 6),
+                    ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1 * _elevationAnimation.value / 6),
+                    blurRadius: 2 * _elevationAnimation.value / 6,
+                    offset: Offset(0, 1 * _elevationAnimation.value / 6),
+                  ),
+                ],
+              ),
+              child: Chip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      widget.icon,
+                      size: 16,
+                      color: _textColorAnimation.value,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: _textColorAnimation.value,
+                        fontWeight: _isHovered ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

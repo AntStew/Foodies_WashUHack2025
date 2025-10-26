@@ -257,6 +257,34 @@ class FirestoreService {
     try {
       AppLogger.info('Saving ${stores.length} suggested stores for user: $uid');
 
+      // Check authentication state first
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        AppLogger.error('No authenticated user found');
+        throw Exception('User not authenticated. Please sign in again.');
+      }
+      
+      if (currentUser.uid != uid) {
+        AppLogger.error('UID mismatch: current user ${currentUser.uid} vs requested $uid');
+        throw Exception('User ID mismatch. Please sign in again.');
+      }
+
+      AppLogger.info('User authentication verified: ${currentUser.uid}');
+
+      // Ensure user document exists
+      final userDoc = await _db.collection('users').doc(uid).get();
+      if (!userDoc.exists) {
+        AppLogger.warning('User document does not exist for uid: $uid, creating it...');
+        // Create a basic user document
+        await _db.collection('users').doc(uid).set({
+          'uid': uid,
+          'email': currentUser.email ?? '',
+          'displayName': currentUser.displayName ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        AppLogger.info('User document created successfully');
+      }
+
       // Clear existing stores first
       await clearSuggestedStores(uid);
 
@@ -286,17 +314,36 @@ class FirestoreService {
   }
 
   Future<void> clearSuggestedStores(String uid) async {
-    final batch = _db.batch();
-    final stores = await _db
-        .collection('users')
-        .doc(uid)
-        .collection('suggestedStores')
-        .get();
+    try {
+      AppLogger.info('Clearing suggested stores for user: $uid');
+      
+      // Check if user document exists first
+      final userDoc = await _db.collection('users').doc(uid).get();
+      if (!userDoc.exists) {
+        AppLogger.info('User document does not exist, no stores to clear');
+        return;
+      }
+      
+      final batch = _db.batch();
+      final stores = await _db
+          .collection('users')
+          .doc(uid)
+          .collection('suggestedStores')
+          .get();
 
-    for (var doc in stores.docs) {
-      batch.delete(doc.reference);
+      AppLogger.info('Found ${stores.docs.length} existing stores to clear');
+
+      for (var doc in stores.docs) {
+        batch.delete(doc.reference);
+      }
+
+      if (stores.docs.isNotEmpty) {
+        await batch.commit();
+      }
+      AppLogger.info('Suggested stores cleared successfully');
+    } catch (e) {
+      AppLogger.error('Error clearing suggested stores', e);
+      rethrow;
     }
-
-    await batch.commit();
   }
 }
