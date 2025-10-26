@@ -214,13 +214,10 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Center(
-              child: Text(
-                item.name[0].toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+              child: Icon(
+                _getCategoryIcon(item.category),
+                color: Colors.white,
+                size: 20,
               ),
             ),
           ),
