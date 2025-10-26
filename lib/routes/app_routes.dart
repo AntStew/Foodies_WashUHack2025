@@ -34,4 +34,19 @@ class AppRoutes {
     savedRecipes: (context) => const SavedRecipesScreen(),
     shoppingList: (context) => const ShoppingListScreen(),
   };
+
+  /// Create a fade transition route
+  static Route<T> fadeTransitionRoute<T>(Widget page, {Duration? duration}) {
+    return PageRouteBuilder<T>(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionDuration: duration ?? const Duration(milliseconds: 300),
+      reverseTransitionDuration: duration ?? const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+    );
+  }
 }
