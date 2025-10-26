@@ -142,12 +142,16 @@ class AvailableIngredientBadge extends StatelessWidget {
         children: [
           const Icon(Icons.check_circle, color: Colors.white, size: 14),
           const SizedBox(width: 6),
-          Text(
-            ingredient,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              ingredient,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
@@ -186,12 +190,16 @@ class MissingIngredientBadge extends StatelessWidget {
         children: [
           const Icon(Icons.cancel, color: Colors.white, size: 14),
           const SizedBox(width: 6),
-          Text(
-            ingredient,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              ingredient,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

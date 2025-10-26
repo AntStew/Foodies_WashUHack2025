@@ -202,75 +202,208 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 800;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Generate Recipe'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: const Text('Generate Recipe'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          titleTextStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/home');
+            },
+          ),
         ),
+        body: _buildBody(isDesktop),
       ),
-      body: Stack(
-        children: [
-          // Dynamic Background
-          RecipeGenerateBackground(recipe: _generatedRecipe),
+    );
+  }
 
-          // Main Content
+  Widget _buildBody(bool isDesktop) {
+    if (_isGenerating) {
+      return const LoadingStateBackground();
+    }
+
+    if (_generatedRecipe == null) {
+      return Stack(
+        children: [
+          RecipeGenerateBackground(recipe: _generatedRecipe),
           SafeArea(
-            child: _isGenerating
-                ? const LoadingStateBackground()
-                : _generatedRecipe == null
-                    ? SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: RecipeGenerationForm(
-                          onFormSubmit: _handleFormSubmit,
-                          initialContext: _additionalContext,
-                          initialMealType: _selectedMealType,
-                        ),
-                      )
-                    : _buildRecipeContent(isDesktop),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: RecipeGenerationForm(
+                onFormSubmit: _handleFormSubmit,
+                initialContext: _additionalContext,
+                initialMealType: _selectedMealType,
+              ),
             ),
+          ),
+        ],
+      );
+    }
+
+    // Recipe content - different layout for mobile vs desktop
+    if (isDesktop) {
+      return Stack(
+        children: [
+          RecipeGenerateBackground(recipe: _generatedRecipe),
+          _buildRecipeContent(isDesktop),
+        ],
+      );
+    } else {
+      // Mobile: Use a single scrollable view
+      return Stack(
+        children: [
+          RecipeGenerateBackground(recipe: _generatedRecipe),
+          _buildMobileScrollableContent(),
+        ],
+      );
+    }
+  }
+
+
+  Widget _buildMobileScrollableContent() {
+    return SafeArea(
+      child: Column(
+        children: [
+          // Scrollable content area
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.8),
+                  ],
+                ),
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GlassyPanel(
+                      child: RecipeHeader(recipe: _generatedRecipe!),
+                    ),
+                    const SizedBox(height: 16),
+                    GlassyPanel(
+                      child: IngredientStatusSection(
+                        availableIngredients: _availableIngredients,
+                        missingIngredients: _missingIngredients,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    GlassyPanel(
+                      child: AllIngredientsSection(recipe: _generatedRecipe!),
+                    ),
+                    const SizedBox(height: 16),
+                    GlassyPanel(
+                      child: InstructionsSection(recipe: _generatedRecipe!),
+                    ),
+                    const SizedBox(height: 100), // Space for bottom buttons
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Fixed bottom buttons
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.8),
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GradientButton(
+                      onPressed: _saveRecipe,
+                      icon: Icons.save,
+                      label: 'Save Recipe',
+                      gradient: LinearGradient(
+                        colors: [Colors.blue.shade600, Colors.blue.shade800],
+                      ),
+                      glowColor: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GradientButton(
+                      onPressed: () {
+                        // Reset the recipe and go back to form
+                        AppLogger.info('Generate New clicked - resetting recipe');
+                        AppLogger.info('Preserved context: "$_additionalContext"');
+                        AppLogger.info('Preserved meal type: ${_selectedMealType.name}');
+                        setState(() {
+                          _generatedRecipe = null;
+                          _availableIngredients = [];
+                          _missingIngredients = [];
+                        });
+                      },
+                      icon: Icons.refresh,
+                      label: 'Generate New',
+                      gradient: LinearGradient(
+                        colors: [Colors.orange.shade400, Colors.orange.shade700],
+                      ),
+                      glowColor: Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-
   Widget _buildRecipeContent(bool isDesktop) {
     return Stack(
       children: [
-        // Scrollable Content
-        SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Stack(
-            children: [
-              // Gradient overlay for readability
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.5),
-                        Colors.black.withValues(alpha: 0.8),
-                      ],
-                    ),
-                  ),
-                ),
+        // Gradient overlay for readability
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.5),
+                  Colors.black.withValues(alpha: 0.8),
+                ],
               ),
-
-              // Content
-              SafeArea(
-                child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
-              ),
-            ],
+            ),
           ),
+        ),
+
+        // Scrollable Content
+        SafeArea(
+          child: _buildDesktopLayout(),
         ),
 
         // Floating Action Buttons
@@ -293,7 +426,8 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
   }
 
   Widget _buildDesktopLayout() {
-    return Container(
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,34 +527,5 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
     );
   }
 
-  Widget _buildMobileLayout() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GlassyPanel(
-            child: RecipeHeader(recipe: _generatedRecipe!),
-          ),
-          const SizedBox(height: 16),
-          GlassyPanel(
-            child: IngredientStatusSection(
-              availableIngredients: _availableIngredients,
-              missingIngredients: _missingIngredients,
-            ),
-          ),
-          const SizedBox(height: 16),
-          GlassyPanel(
-            child: AllIngredientsSection(recipe: _generatedRecipe!),
-          ),
-          const SizedBox(height: 16),
-          GlassyPanel(
-            child: InstructionsSection(recipe: _generatedRecipe!),
-          ),
-          const SizedBox(height: 100), // Space for floating buttons
-        ],
-      ),
-    );
-  }
 
 }

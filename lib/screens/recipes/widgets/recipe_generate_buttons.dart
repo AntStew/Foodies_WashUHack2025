@@ -15,15 +15,60 @@ class RecipeGenerateFloatingButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 800;
     
-    return Positioned(
-      bottom: isDesktop ? 32 : 24,
-      left: isDesktop ? 32 : 24,
-      right: isDesktop ? 32 : 24,
-      child: Center(
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: isDesktop ? 600 : double.infinity,
+    if (isDesktop) {
+      // Desktop: Positioned floating buttons
+      return Positioned(
+        bottom: 32,
+        left: 32,
+        right: 32,
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GradientButton(
+                    onPressed: onSaveRecipe,
+                    icon: Icons.save,
+                    label: 'Save Recipe',
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade600, Colors.blue.shade800],
+                    ),
+                    glowColor: Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: GradientButton(
+                    onPressed: onGenerateNew,
+                    icon: Icons.refresh,
+                    label: 'Generate New',
+                    gradient: LinearGradient(
+                      colors: [Colors.orange.shade400, Colors.orange.shade700],
+                    ),
+                    glowColor: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
           ),
+        ),
+      );
+    } else {
+      // Mobile: Fixed bottom buttons
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.black.withValues(alpha: 0.8),
+            ],
+          ),
+        ),
+        child: SafeArea(
           child: Row(
             children: [
               Expanded(
@@ -37,7 +82,7 @@ class RecipeGenerateFloatingButtons extends StatelessWidget {
                   glowColor: Colors.blue,
                 ),
               ),
-              SizedBox(width: isDesktop ? 20 : 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: GradientButton(
                   onPressed: onGenerateNew,
@@ -52,7 +97,7 @@ class RecipeGenerateFloatingButtons extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }
