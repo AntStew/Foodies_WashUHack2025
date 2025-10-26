@@ -9,6 +9,9 @@ const kHerbGreen = Color(0xFF27AE60);
 const kCream     = Color(0xFFFFF8DC);
 const kCharcoal  = Color(0xFF2C3E50);
 
+/// Shared section padding (uniform everywhere)
+const kSectionPad = EdgeInsets.symmetric(horizontal: 24, vertical: 56);
+
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
 
@@ -16,126 +19,247 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kCream,
-      extendBodyBehindAppBar: true,
-      body: Stack(
+      // IMPORTANT: body is NOT behind the app bar anymore
+      extendBodyBehindAppBar: false,
+      appBar: const _TopBar(), // sticky horizontal bar, more opaque for readability
+      body: SingleChildScrollView(
+        child: Column(
+          children: const [
+            _HeroSplit(),
+            _WhyCookNUp(),
+            _FeaturesWithImages(),
+            _Reviews(),
+            _CtaTransform(),
+            _FooterColumns(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ===================  Top Navigation Bar  ===================
+/// Semi-opaque background so text is readable over any content.
+/// Sits above the hero now (no overlap).
+class _TopBar extends StatelessWidget implements PreferredSizeWidget {
+  const _TopBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(72);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      elevation: 6,
+      centerTitle: false,
+      backgroundColor: const Color(0xF21F2A36), // ~95% opaque dark blue-gray
+      // If you prefer slightly lighter: const Color(0xE61F2A36)
+      shadowColor: Colors.black.withOpacity(0.25),
+      titleSpacing: 8,
+      title: Row(
         children: [
-          // Full screen background
-          Positioned.fill(
-            child: Image.asset('design/background/delicious-lobster-gourmet-seafood.jpg', fit: BoxFit.cover),
+          Image.asset(
+            'design/Assestss/LOGO.png',
+            height: 28,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 24),
           ),
+          const SizedBox(width: 10),
+          const Text(
+            'COOKNUP',
+            style: TextStyle(
+              color: Colors.white,
+              letterSpacing: 1.1,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        const _TopLink(label: 'Why'),
+        const _TopLink(label: 'How it works'),
+        const _TopLink(label: 'Reviews'),
+        const SizedBox(width: 8),
+        // Login
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white, width: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            ),
+            icon: const Icon(Icons.login_rounded, size: 18),
+            label: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Sign Up
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [kTomatoRed, kEggYellow]),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4)),
+              ],
+            ),
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              ),
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18, color: Colors.white),
+              label: const Text(
+                'Sign Up',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TopLink extends StatelessWidget {
+  const _TopLink({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Center(
+        child: Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
+
+/// ===================  HERO (split)  ===================
+class _HeroSplit extends StatelessWidget {
+  const _HeroSplit();
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 950;
+
+    return SizedBox(
+      // slightly shorter so the down arrow is visible on first paint
+      height: (size.height * .88).clamp(560, 720),
+      child: Stack(
+        children: [
+          // Food background
+          Positioned.fill(
+            child: Image.asset(
+              'design/Assestss/2.webp',
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(color: const Color(0xFFFAEBD7)),
+            ),
+          ),
+          // Darkening overlay
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0x99000000), Color(0x33000000)],
+                  begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                  colors: [Color(0xAA000000), Color(0x55000000)],
                 ),
               ),
             ),
           ),
 
-          // Content with safe area
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Add top padding to avoid overlap with fixed header
-                  const SizedBox(height: 100),
-                  // HERO
-                  SizedBox(
-                    height: size.height * 0.9,
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1100),
+          // Content
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // LEFT: Logo + copy + CTAs
+                    Expanded(
+                      flex: isMobile ? 100 : 55,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: isMobile ? 0 : 18, bottom: isMobile ? 20 : 0),
                         child: Card(
-                          color: Colors.white.withValues(alpha: .95),
-                          elevation: 14,
+                          elevation: 20,
+                          color: Colors.white.withOpacity(.97),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 60),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text.rich(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Big logo (no name text)
+                                Center(
+                                  child: Image.asset(
+                                    'design/Assestss/LOGO.png',
+                                    height: 190,
+                                    errorBuilder: (_, __, ___) =>
+                                        const Icon(Icons.restaurant_menu_rounded, size: 150, color: kTomatoRed),
+                                  ),
+                                ),
+                                const SizedBox(height: 22),
+                                // Sub-headline
+                                const Text.rich(
                                   TextSpan(children: [
                                     TextSpan(
-                                      text: "Cook",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w900, 
-                                        color: kCharcoal,
-                                        fontSize: size.width < 600 ? 56 : 84,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.3),
-                                            offset: const Offset(3, 3),
-                                            blurRadius: 6,
-                                          ),
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            offset: const Offset(6, 6),
-                                            blurRadius: 12,
-                                          ),
-                                        ],
-                                      ),
+                                      text: "What's For ",
+                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kCharcoal),
                                     ),
                                     TextSpan(
-                                      text: "N",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: size.width < 600 ? 56 : 84,
-                                        foreground: Paint()
-                                          ..shader = const LinearGradient(
-                                            colors: [kTomatoRed, Color(0xFFE67E22)],
-                                          ).createShader(const Rect.fromLTWH(0, 0, 300, 60)),
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.3),
-                                            offset: const Offset(3, 3),
-                                            blurRadius: 6,
-                                          ),
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            offset: const Offset(6, 6),
-                                            blurRadius: 12,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: "Up",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w900, 
-                                        color: kCharcoal,
-                                        fontSize: size.width < 600 ? 56 : 84,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.3),
-                                            offset: const Offset(3, 3),
-                                            blurRadius: 6,
-                                          ),
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            offset: const Offset(6, 6),
-                                            blurRadius: 12,
-                                          ),
-                                        ],
-                                      ),
+                                      text: "Dinner?",
+                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kTomatoRed),
                                     ),
                                   ]),
                                   textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  "What's cookin'?",
-                                  textAlign: TextAlign.center, 
-                                  style: TextStyle(color: Colors.black54, fontSize: 18, fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 12),
                                 const Text(
                                   "Turn your fridge chaos into delicious meals — powered by AI.",
-                                  textAlign: TextAlign.center, 
-                                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.black87, fontSize: 17, fontWeight: FontWeight.w500),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  "No more food waste. No more 6pm panic. Just good food.",
+                                  textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 15),
+                                ),
+                                const SizedBox(height: 32),
+                                _GradientButton(
+                                  label: "Start Cooking Smart",
+                                  icon: Icons.search_rounded,
+                                  onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
+                                ),
+                                const SizedBox(height: 14),
+                                SizedBox(
+                                  height: 56, width: double.infinity,
+                                  child: OutlinedButton(
+                                    onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(color: kCharcoal, width: 2),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    ),
+                                    child: const Text(
+                                      'Already a Chef? Log In',
+                                      style: TextStyle(color: kCharcoal, fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -143,77 +267,47 @@ class LandingPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
 
-                  // FEATURES
-                  const _Features(),
-
-                  // ABOUT
-                  const _About(),
-
-                  // FOOTER
-                  const _Footer(),
-                ],
+                    // RIGHT: one fridge photo + static AI badge
+                    if (!isMobile)
+                      Expanded(
+                        flex: 45,
+                        child: Padding(
+                          // keep horizontal left spacing but reduce vertical padding
+                          padding: const EdgeInsets.only(left: 18, top: 12, bottom: 12),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(28),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: Image.asset(
+                                    'design/Assestss/1.jpeg',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: Colors.black12,
+                                      alignment: Alignment.center,
+                                      child: const Icon(Icons.kitchen_outlined, size: 72, color: Colors.white54),
+                                    ),
+                                  ),
+                                ),
+                                const _AiBadgeStatic(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
 
-          // Fixed header with buttons - positioned last so it's on top
-          Positioned(
-            top: 0,
+          // Scroll hint (chevron)
+          const Positioned(
+            bottom: 16,
             left: 0,
             right: 0,
-            child: Container(
-              color: Colors.transparent,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        height: 56,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white, width: 2),
-                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                          ),
-                          child: const Text(
-                            "Login",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        height: 56,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [kTomatoRed, kEggYellow]),
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                            ),
-                            child: const Text(
-                              "Get Started",
-                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            child: _ScrollHint(),
           ),
         ],
       ),
@@ -221,64 +315,301 @@ class LandingPage extends StatelessWidget {
   }
 }
 
+class _AiBadgeStatic extends StatelessWidget {
+  const _AiBadgeStatic();
 
-class _Features extends StatelessWidget {
-  const _Features();
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 600;
-    
+    return Positioned(
+      top: 16, right: 16,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(16),
+          boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 10, offset: Offset(0, 4))],
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: const [
+          Icon(Icons.bolt_rounded, color: kEggYellow, size: 20),
+          SizedBox(width: 8),
+          Text('AI Analyzing… 23 ingredients found', style: TextStyle(fontWeight: FontWeight.w600)),
+        ]),
+      ),
+    );
+  }
+}
+
+class _ScrollHint extends StatelessWidget {
+  const _ScrollHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white70, size: 34),
+        Text('Scroll', style: TextStyle(color: Colors.white70)),
+      ],
+    );
+  }
+}
+
+class _GradientButton extends StatelessWidget {
+  const _GradientButton({required this.label, required this.onPressed, this.icon});
+  final String label; final IconData? icon; final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 56, width: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [kEggYellow, kTomatoRed]),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 6))],
+        ),
+        child: ElevatedButton.icon(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent, shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            foregroundColor: Colors.white, textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          ),
+          icon: icon != null ? Icon(icon, size: 22) : const SizedBox.shrink(),
+          label: Text(label),
+        ),
+      ),
+    );
+  }
+}
+
+/// ===================  Why CookNUp?  ===================
+class _WhyCookNUp extends StatelessWidget {
+  const _WhyCookNUp();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: isMobile ? 40 : 60),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
+      padding: kSectionPad,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            children: [
+              const Text(
+                "Why CookNUp?",
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 40, color: kCharcoal),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Make the most of what’s already in your kitchen with less waste, less stress, and more flavor.",
+                style: TextStyle(color: Colors.black54, fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              Wrap(
+                spacing: 18,
+                runSpacing: 18,
+                alignment: WrapAlignment.center,
+                children: const [
+                  _ValueCard(
+                    icon: Icons.auto_awesome_rounded,
+                    title: "Personalized by AI",
+                    text: "Your ingredients, your tastes — tailored recipes in seconds.",
+                    color: kEggYellow,
+                  ),
+                  _ValueCard(
+                    icon: Icons.timer_rounded,
+                    title: "Fast & Easy",
+                    text: "Pick time and skill level, we’ll fit recipes to your day.",
+                    color: kTomatoRed,
+                  ),
+                  _ValueCard(
+                    icon: Icons.eco_rounded,
+                    title: "Waste Less, Save More",
+                    text: "Use what you have before it expires and cut grocery costs.",
+                    color: kHerbGreen,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ValueCard extends StatelessWidget {
+  const _ValueCard({
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 360),
+      child: Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withOpacity(.25), width: 2),
+          boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 8))],
+        ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Why CookNUp?",
-              style: TextStyle(
-                fontSize: isMobile ? 28 : 36,
-                fontWeight: FontWeight.w800,
-                color: kCharcoal,
+            CircleAvatar(backgroundColor: color, radius: 22, child: Icon(icon, color: Colors.white)),
+            const SizedBox(height: 12),
+            Text(title,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: kCharcoal)),
+            const SizedBox(height: 6),
+            Text(text, style: const TextStyle(color: Colors.black87, fontSize: 16)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ===================  How It Works (image cards)  ===================
+class _FeaturesWithImages extends StatelessWidget {
+  const _FeaturesWithImages();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: kCream,
+      padding: kSectionPad,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text("How It Works",
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 40, color: kCharcoal)),
+              const SizedBox(height: 8),
+              const Text("Three simple steps to culinary brilliance",
+                  style: TextStyle(color: Colors.black54, fontSize: 18), textAlign: TextAlign.center),
+              const SizedBox(height: 26),
+              Wrap(
+                spacing: 22, runSpacing: 22, alignment: WrapAlignment.center,
+                children: const [
+                  _ImageFeatureCard(
+                    imagePath: 'design/Assestss/6.jpeg',
+                    badgeColor: kTomatoRed,
+                    badgeIcon: Icons.photo_camera_outlined,
+                    title: 'Snap Your Fridge',
+                    text: 'Just take a photo. Our AI does the rest. No typing, no lists, no hassle.',
+                    borderColor: kTomatoRed,
+                  ),
+                  _ImageFeatureCard(
+                    imagePath: 'design/Assestss/7.jpeg',
+                    badgeColor: kEggYellow,
+                    badgeIcon: Icons.auto_awesome_rounded,
+                    title: 'Instant Recipe Magic',
+                    text: 'Get personalized recipes in seconds, not hours. AI-powered culinary genius.',
+                    borderColor: kEggYellow,
+                  ),
+                  _ImageFeatureCard(
+                    imagePath: 'design/Assestss/8.jpg',
+                    badgeColor: kHerbGreen,
+                    badgeIcon: Icons.recycling_rounded,
+                    title: 'Save Time, Save Money',
+                    text: 'Cook smarter and faster. Enjoy delicious homemade meals.',
+                    borderColor: kHerbGreen,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Turn your fridge chaos into delicious meals with AI-powered recipe suggestions",
-              style: TextStyle(
-                fontSize: isMobile ? 16 : 18,
-                color: Colors.black54,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageFeatureCard extends StatelessWidget {
+  const _ImageFeatureCard({
+    required this.imagePath,
+    required this.badgeColor,
+    required this.badgeIcon,
+    required this.title,
+    required this.text,
+    required this.borderColor,
+  });
+
+  final String imagePath;
+  final Color badgeColor;
+  final IconData badgeIcon;
+  final String title;
+  final String text;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 360),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor.withOpacity(.35), width: 2),
+          boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 14, offset: Offset(0, 8))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image header
+            SizedBox(
+              height: 200,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.black12,
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.image_outlined, size: 56, color: Colors.white70),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 14,
+                    bottom: 14,
+                    child: Container(
+                      width: 42, height: 42,
+                      decoration: BoxDecoration(color: badgeColor, shape: BoxShape.circle),
+                      child: Icon(badgeIcon, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-            SizedBox(height: isMobile ? 32 : 48),
-            Wrap(
-              spacing: isMobile ? 16 : 24,
-              runSpacing: isMobile ? 16 : 24,
-              alignment: WrapAlignment.center,
-              children: [
-                const _FeatureCard(
-                  icon: Icons.smart_toy,
-                  title: "AI-Powered",
-                  description: "Get personalized recipe suggestions based on your ingredients",
-                  color: kTomatoRed,
-                ),
-                const _FeatureCard(
-                  icon: Icons.inventory_2,
-                  title: "Smart Inventory",
-                  description: "Track your fridge contents and get expiration alerts",
-                  color: kHerbGreen,
-                ),
-                const _FeatureCard(
-                  icon: Icons.restaurant_menu,
-                  title: "Recipe Variety",
-                  description: "Discover new cuisines and cooking techniques",
-                  color: kEggYellow,
-                ),
-              ],
+            // Body
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: kCharcoal)),
+                  const SizedBox(height: 8),
+                  Text(text, style: const TextStyle(color: Colors.black87, fontSize: 16)),
+                ],
+              ),
             ),
           ],
         ),
@@ -287,66 +618,93 @@ class _Features extends StatelessWidget {
   }
 }
 
-class _FeatureCard extends StatelessWidget {
-  const _FeatureCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.color,
-  });
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
+/// ===================  Reviews  ===================
+class _Reviews extends StatelessWidget {
+  const _Reviews();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 600;
-    
+    final reviews = const [
+      ["Navin Bhattarai", "Saved my weeknights! The AI actually matches what’s in my fridge."],
+      ["Elijah Brown", "Fast, tasty suggestions. I’m cooking more and wasting less."],
+      ["Anthony Stewart", "Took a photo, got dinner ideas in seconds. Super clean UI too."],
+    ];
+
     return Container(
-      width: isMobile ? double.infinity : 300,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+      color: Colors.white,
+      padding: kSectionPad,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                "What People Say",
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 40,
+                  color: kCharcoal,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Wrap(
+                spacing: 18,
+                runSpacing: 18,
+                alignment: WrapAlignment.center,
+                children: reviews.map((r) {
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 360),
+                    child: Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // ★★★★★ Stars Row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                5,
+                                (index) => const Icon(
+                                  Icons.star_rounded,
+                                  color: Colors.amber,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // Review Text
+                            Text(
+                              r[1],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.black87, fontSize: 16),
+                            ),
+                            const SizedBox(height: 10),
+                            // Reviewer Name
+                            Text(
+                              "— ${r[0]}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.black54,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 32, color: color),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: kCharcoal,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -358,128 +716,192 @@ class _CtaTransform extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 600;
-    
     return Container(
-      color: const Color(0xFFF8F9FA),
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: isMobile ? 40 : 60),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(
-          children: [
-            Text(
-              "About CookNUp",
-              style: TextStyle(
-                fontSize: isMobile ? 28 : 36,
-                fontWeight: FontWeight.w800,
-                color: kCharcoal,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 72),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFF2994A), kTomatoRed],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Column(
+            children: [
+              const Text(
+                "Ready to Transform Your Kitchen?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  fontSize: 44,
+                  letterSpacing: .2,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "CookNUp is your AI-powered kitchen companion that helps you make the most of what's in your fridge. No more wasted ingredients or boring meals!",
-              style: TextStyle(
-                fontSize: isMobile ? 16 : 18,
-                color: Colors.black54,
+              const SizedBox(height: 10),
+              const Text(
+                "Join thousands of home chefs cooking smarter, not harder",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 18),
               ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: isMobile ? 24 : 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (!isMobile) ...[
-                  Expanded(
-                    child: Image.asset(
-                      'design/background/foodbg.jpg',
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
+              const SizedBox(height: 26),
+              SizedBox(
+                height: 58,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: kTomatoRed,
+                    elevation: 8,
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  const SizedBox(width: 24),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const _AboutItem(
-                        icon: Icons.auto_awesome,
-                        title: "AI Recipe Generation",
-                        description: "Get personalized recipes based on your available ingredients",
-                      ),
-                      const SizedBox(height: 16),
-                      const _AboutItem(
-                        icon: Icons.timer,
-                        title: "Quick & Easy",
-                        description: "Find recipes that fit your time constraints and skill level",
-                      ),
-                      const SizedBox(height: 16),
-                      const _AboutItem(
-                        icon: Icons.eco,
-                        title: "Reduce Waste",
-                        description: "Use ingredients before they expire and reduce food waste",
-                      ),
-                    ],
+                  icon: const Icon(Icons.rocket_launch_rounded),
+                  label: const Text(
+                    "Get Started Free",
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
                   ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "No credit card required • 100% free to start",
+                style: TextStyle(color: Colors.white70),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _AboutItem extends StatelessWidget {
-  const _AboutItem({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-  final IconData icon;
-  final String title;
-  final String description;
+/// ===================  Footer (columns)  ===================
+class _FooterColumns extends StatelessWidget {
+  const _FooterColumns();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: kTomatoRed.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20, color: kTomatoRed),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
+    const heading = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w700,
+      fontSize: 16,
+    );
+    const link = TextStyle(
+      color: Colors.white70,
+      fontSize: 14,
+    );
+
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF1F2A36),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: kCharcoal,
-                ),
+              // Columns
+              Wrap(
+                spacing: 40,
+                runSpacing: 24,
+                children: const [
+                  _FooterCol(
+                    width: 280,
+                    title: "COOKNUP",
+                    body: Text(
+                      "Making home cooking easy, sustainable, and delicious.",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    headingStyle: heading,
+                  ),
+                  _FooterList(
+                    title: "Product",
+                    items: ["Features", "How It Works", "Pricing"],
+                    headingStyle: heading,
+                    itemStyle: link,
+                  ),
+                  _FooterList(
+                    title: "Company",
+                    items: ["About", "Blog", "Contact"],
+                    headingStyle: heading,
+                    itemStyle: link,
+                  ),
+                  _FooterCol(
+                    title: "Credits",
+                    headingStyle: heading,
+                    body: _CreditsRight(),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                description,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
+              const SizedBox(height: 24),
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 10),
+              const Text(
+                "© 2025 COOKNUP. All rights reserved.",
+                style: TextStyle(color: Colors.white60),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CreditsRight extends StatelessWidget {
+  const _CreditsRight();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.end, // right-align column to match textAlign
+      children: [
+        Text(
+          "Created for WashU Hackathon 2025",
+          textAlign: TextAlign.left,
+          style: TextStyle(color: Colors.white60, fontSize: 16),
+        ),
+        SizedBox(height: 8),
+        // Two names per line, simple and clean
+        Text(
+          "Anthony Stewart , Elijah Brown\nNavin Bhattarai & Horlasy D.",
+          textAlign: TextAlign.left,
+          style: TextStyle(color: Colors.white60, fontSize: 14, height: 1.35),
+        ),
       ],
+    );
+  }
+}
+
+class _FooterCol extends StatelessWidget {
+  const _FooterCol({
+    required this.title,
+    required this.body,
+    required this.headingStyle,
+    this.width,
+  });
+
+  final String title;
+  final Widget body;
+  final TextStyle headingStyle;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width ?? 220,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: headingStyle),
+          const SizedBox(height: 10),
+          body,
+        ],
+      ),
     );
   }
 }
@@ -499,62 +921,17 @@ class _FooterList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 600;
-
-    return Container(
-      color: const Color(0xFF1F2A36),
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: isMobile ? 32 : 48),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(
-          children: [
-            isMobile
-              ? Column(children: [
-                  const Text("CookNUp", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 8),
-                  const Text("What's cookin'?", style: TextStyle(color: Colors.white70, fontSize: 16, fontStyle: FontStyle.italic)),
-                  const SizedBox(height: 16),
-                  const Text("Turn your fridge chaos into delicious meals — powered by AI.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 14)),
-                  const SizedBox(height: 24),
-                  const Text("Created for WashU Hackathon 2025", textAlign: TextAlign.center, style: TextStyle(color: Colors.white60, fontSize: 14)),
-                  const SizedBox(height: 8),
-                  const Text("by Anthony Stewart, Elijah Brown, Navin Bhattarai, and Horlasy D.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white60, fontSize: 12)),
-                ])
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("CookNUp", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 8),
-                          const Text("What's cookin'?", style: TextStyle(color: Colors.white70, fontSize: 18, fontStyle: FontStyle.italic)),
-                          const SizedBox(height: 12),
-                          const Text("Turn your fridge chaos into delicious meals — powered by AI.", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text("Created for WashU Hackathon 2025", textAlign: TextAlign.right, style: TextStyle(color: Colors.white60, fontSize: 16)),
-                          const SizedBox(height: 8),
-                          const Text("by Anthony Stewart, Elijah Brown,\nNavin Bhattarai, and Horlasy D.", textAlign: TextAlign.right, style: TextStyle(color: Colors.white60, fontSize: 14)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-            const SizedBox(height: 24),
-            const Divider(color: Colors.white30),
-            const SizedBox(height: 16),
-            const Text("© 2025 CookNUp. All rights reserved.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white60, fontSize: 12)),
-          ],
-        ),
+    return _FooterCol(
+      title: title,
+      headingStyle: headingStyle,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: items
+            .map((t) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text(t, style: itemStyle),
+                ))
+            .toList(),
       ),
     );
   }

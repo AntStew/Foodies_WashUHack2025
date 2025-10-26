@@ -85,6 +85,7 @@ flutter:
 
   assets:
     - design/Assestss/
+    - design/Assestss/LOGO.png
     - design/Assestss/3.jpeg
     - design/background/aisle.jpg
     - design/background/delicious-lobster-gourmet-seafood.jpg
