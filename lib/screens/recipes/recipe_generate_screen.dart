@@ -507,13 +507,13 @@ class _HoverableIngredientItemState extends State<_HoverableIngredientItem> with
                 boxShadow: [
                   if (_isHovered)
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.3 * _elevationAnimation.value / 8),
+                      color: Colors.orange.withValues(alpha: 0.3 * _elevationAnimation.value / 8),
                       blurRadius: 8 * _elevationAnimation.value / 8,
                       offset: Offset(0, 4 * _elevationAnimation.value / 8),
                       spreadRadius: 1 * _elevationAnimation.value / 8,
                     ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1 * _elevationAnimation.value / 8),
+                    color: Colors.black.withValues(alpha: 0.1 * _elevationAnimation.value / 8),
                     blurRadius: 4 * _elevationAnimation.value / 8,
                     offset: Offset(0, 2 * _elevationAnimation.value / 8),
                   ),
@@ -624,12 +624,12 @@ class _HoverableRecipeChipState extends State<_HoverableRecipeChip> with SingleT
                 boxShadow: [
                   if (_isHovered)
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.2 * _elevationAnimation.value / 6),
+                      color: Colors.orange.withValues(alpha: 0.2 * _elevationAnimation.value / 6),
                       blurRadius: 6 * _elevationAnimation.value / 6,
                       offset: Offset(0, 3 * _elevationAnimation.value / 6),
                     ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1 * _elevationAnimation.value / 6),
+                    color: Colors.black.withValues(alpha: 0.1 * _elevationAnimation.value / 6),
                     blurRadius: 2 * _elevationAnimation.value / 6,
                     offset: Offset(0, 1 * _elevationAnimation.value / 6),
                   ),
