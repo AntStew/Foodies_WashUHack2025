@@ -32,15 +32,28 @@ class OpenAIService {
     List<String> ingredients,
     List<String> dietaryRestrictions,
     List<String> cuisinePreferences,
-    int servings,
-  ) async {
+    int servings, {
+    String? additionalContext,
+    String? mealType,
+  }) async {
     try {
+      // Debug logging
+      AppLogger.info('Generating recipe with parameters:');
+      AppLogger.info('Ingredients: $ingredients');
+      AppLogger.info('Dietary restrictions: $dietaryRestrictions');
+      AppLogger.info('Cuisine preferences: $cuisinePreferences');
+      AppLogger.info('Servings: $servings');
+      AppLogger.info('Additional context: "$additionalContext"');
+      AppLogger.info('Meal type: "$mealType"');
+      
       final callable = _functions.httpsCallable('generateRecipe');
       final result = await callable.call({
         'ingredients': ingredients,
         'dietaryRestrictions': dietaryRestrictions,
         'cuisinePreferences': cuisinePreferences,
         'servings': servings,
+        'additionalContext': additionalContext ?? '',
+        'mealType': mealType ?? 'dinner',
       });
 
       if (result.data['success'] == true) {
@@ -55,7 +68,7 @@ class OpenAIService {
   }
 
   // Generate shopping list based on current fridge contents using Cloud Function
-  Future<List<Map<String, String>>> generateShoppingList(
+  Future<Map<String, dynamic>> generateShoppingList(
     List<String> currentIngredients,
     List<String> dietaryRestrictions,
     List<String> cuisinePreferences,
@@ -72,17 +85,26 @@ class OpenAIService {
 
       if (result.data['success'] == true) {
         final items = result.data['items'] as List;
-        return items.map((item) => {
-          'name': item['name'] as String,
-          'category': item['category'] as String,
-          'quantity': item['quantity'] as String,
-        }).toList();
+        final stores = result.data['suggestedStores'] as List? ?? [];
+
+        return {
+          'items': items.map((item) => {
+            'name': item['name'] as String,
+            'category': item['category'] as String,
+            'quantity': item['quantity'] as String,
+          }).toList(),
+          'stores': stores.map((store) => {
+            'name': store['name'] as String,
+            'reason': store['reason'] as String,
+            'categories': List<String>.from(store['categories'] ?? []),
+          }).toList(),
+        };
       }
 
-      return [];
+      return {'items': [], 'stores': []};
     } catch (e) {
       AppLogger.error('Error generating shopping list', e);
-      return [];
+      return {'items': [], 'stores': []};
     }
   }
 }

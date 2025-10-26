@@ -25,10 +25,25 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscure = true; // show/hide password
 
   @override
+  void initState() {
+    super.initState();
+    _checkAuthState();
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkAuthState() async {
+    // Check if user is already logged in
+    final user = _authService.currentUser;
+    if (user != null && mounted) {
+      // User is already logged in, redirect to home
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   Future<void> _login() async {
@@ -64,13 +79,64 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _showForgotPasswordDialog() async {
+    final emailController = TextEditingController(text: _emailController.text.trim());
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: TextField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) return;
+              
+              final navigator = Navigator.of(context);
+
+              try {
+                await _authService.resetPassword(email);
+                if (!mounted) return;
+                navigator.pop();
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(content: Text('Password reset email sent! Check your inbox.')),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('Error: ${e.toString()}')),
+                );
+              }
+            },
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+    emailController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       // no AppBar → full-bleed visual to match landing page
       body: Stack(
         children: [
-          // Background image 
+          // Full screen background image 
           Positioned.fill(
             child: Image.asset(
               'design/Assestss/3.jpeg',
@@ -78,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Warm overlay for readability (tomato → egg gradient)
+          // Full screen warm overlay for readability (tomato → egg gradient)
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -91,8 +157,9 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Form card
-          Center(
+          // Form card with safe area
+          SafeArea(
+            child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: ConstrainedBox(
@@ -132,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(width: 12),
                               const Text(
-                                'Foodies',
+                                'CookNUp',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w800,
@@ -217,9 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {
-                                // TODO: hook up forgot-password screen if you have one
-                              },
+                              onPressed: _showForgotPasswordDialog,
                               child: const Text('Forgot your secret sauce?'),
                             ),
                           ),
@@ -297,12 +362,28 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          
+                          // Go to landing page
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(context, '/');
+                            },
+                            child: const Text(
+                              "Back to Home",
+                              style: TextStyle(
+                                color: _kCharcoal,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],

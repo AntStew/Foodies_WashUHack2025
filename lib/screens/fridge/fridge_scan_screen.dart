@@ -41,22 +41,25 @@ class _FridgeScanScreenState extends State<FridgeScanScreen> {
       final currentIngredients = fridgeItems.map((item) => item['name']!).toList();
 
       // Generate shopping list with AI
-      final shoppingListItems = await _openAiService.generateShoppingList(
+      final aiResponse = await _openAiService.generateShoppingList(
         currentIngredients,
         dietaryRestrictions,
         cuisinePreferences,
         servingSize,
       );
 
+      final shoppingListItems = aiResponse['items'] as List;
+
       if (shoppingListItems.isNotEmpty) {
         // Convert to ShoppingListItem models
         final now = DateTime.now();
         final items = shoppingListItems.map((itemData) {
+          final item = itemData as Map<String, dynamic>;
           return ShoppingListItem(
             id: '',
-            name: itemData['name']!,
-            category: itemData['category']!,
-            quantity: itemData['quantity']!,
+            name: item['name'] as String? ?? '',
+            category: item['category'] as String? ?? 'Other',
+            quantity: item['quantity'] as String? ?? '1',
             isChecked: false,
             createdAt: now,
           );
@@ -245,39 +248,28 @@ class _FridgeScanScreenState extends State<FridgeScanScreen> {
             )
           : Stack(
               children: [
-                // Background Image or Gradient
-                if (_pickedFile != null)
-                  Positioned.fill(
-                    child: kIsWeb
-                        ? Image.network(
-                            _pickedFile!.path,
-                            fit: BoxFit.cover,
-                          )
-                        : _imageFile != null
-                            ? Image.file(
-                                _imageFile!,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.white, Colors.grey],
-                                  ),
-                                ),
-                              ),
-                  )
-                else
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.white, Colors.grey],
-                      ),
-                    ),
-                  ),
+                // Background Image or Fallback
+                Positioned.fill(
+                  child: _pickedFile != null
+                      ? (kIsWeb
+                          ? Image.network(
+                              _pickedFile!.path,
+                              fit: BoxFit.cover,
+                            )
+                          : _imageFile != null
+                              ? Image.file(
+                                  _imageFile!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  'design/background/fridgeerr.jpg',
+                                  fit: BoxFit.cover,
+                                ))
+                      : Image.asset(
+                          'design/background/fridgeerr.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                ),
 
                 // Content - Centered with black translucent background
                 Center(
