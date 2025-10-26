@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../../../models/fridge_item_model.dart';
 
 class CategorySectionWidget extends StatefulWidget {
@@ -46,18 +47,26 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -142,6 +151,8 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
           ),
         ],
       ),
+        ),
+      ),
     );
   }
 
@@ -155,14 +166,14 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
             Icon(
               _getCategoryIcon(category),
               size: 48,
-              color: Colors.grey[400],
+              color: Colors.white.withValues(alpha: 0.6),
             ),
             const SizedBox(height: 16),
             Text(
               'No ${_getCategoryDisplayName(category).toLowerCase()} items',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[600],
+                color: Colors.white.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -171,7 +182,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
               'Add items to your fridge to see them here',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[500],
+                color: Colors.white.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -192,17 +203,21 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
   }
 
   Widget _buildListItem(FridgeItem item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey[200]!,
-          width: 1,
-        ),
-      ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
       child: Row(
         children: [
           // Category Icon
@@ -233,7 +248,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D3748),
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -243,7 +258,7 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
                       'Quantity: ${item.quantity}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                     if (item.expiryDate != null) ...[
@@ -310,6 +325,8 @@ class _CategorySectionWidgetState extends State<CategorySectionWidget>
             ],
           ),
         ],
+      ),
+        ),
       ),
     );
   }

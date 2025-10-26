@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/fridge_item_model.dart';
@@ -42,56 +43,103 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ===== Fixed Gradient AppBar =====
-            Container(
-              height: 110,
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          // Gradient Background
+          Positioned.fill(
+            child: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [
                     Color.fromARGB(255, 209, 38, 38),
-                    Color.fromARGB(183, 255, 124, 30),
-                    Color.fromARGB(0, 255, 255, 255),
+                    Color.fromARGB(255, 255, 124, 30),
+                    Color.fromARGB(255, 255, 152, 60),
                   ],
                 ),
               ),
+            ),
+          ),
+          // Main Content
+          SafeArea(
+            child: Column(
+              children: [
+                // ===== Glassy Header =====
+                ClipRRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      height: 110,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.15),
+                            Colors.white.withValues(alpha: 0.05),
+                          ],
+                        ),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            width: 1,
+                          ),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8F9FA),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search ingredients...',
-                              hintStyle: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 14,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                            child: Container(
+                              height: 45,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  width: 1,
+                                ),
                               ),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                color: Colors.grey[600],
-                                size: 20,
-                              ),
-                              suffixIcon: _searchController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: Icon(
-                                        Icons.clear_rounded,
-                                        color: Colors.grey[600],
-                                        size: 18,
-                                      ),
+                              child: TextField(
+                                controller: _searchController,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Search ingredients...',
+                                  hintStyle: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    fontSize: 14,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search_rounded,
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                    size: 20,
+                                  ),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: Icon(
+                                            Icons.clear_rounded,
+                                            color: Colors.white.withValues(alpha: 0.8),
+                                            size: 18,
+                                          ),
                                       onPressed: () {
                                         setState(() {
                                           _searchController.clear();
@@ -100,39 +148,37 @@ class _HomeScreenState extends State<HomeScreen> {
                                       },
                                     )
                                   : null,
-                              border: InputBorder.none,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                _isSearching = value.isNotEmpty;
-                              });
-                            },
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isSearching = value.isNotEmpty;
+                                  });
+                                },
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        icon: const Icon(Icons.bookmark_rounded, color: Colors.black),
+                        icon: const Icon(Icons.bookmark_rounded, color: Colors.white),
                         tooltip: 'Saved Recipes',
                         onPressed: () {
                           Navigator.pushNamed(context, '/saved-recipes');
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
+                        icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
                         tooltip: 'Shopping List',
                         onPressed: () {
                           Navigator.pushNamed(context, '/shopping-list');
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.logout, color: Colors.black),
+                        icon: const Icon(Icons.logout, color: Colors.white),
                         tooltip: 'Sign Out',
                         onPressed: () async {
                           await _authService.signOut();
@@ -143,83 +189,87 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-              ),
-            ),
+                      ),
+                    ),
+                  ),
+                ),
 
-            // ===== Static Fridge Content =====
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isDesktop = constraints.maxWidth > 800;
+                // ===== Static Fridge Content =====
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isDesktop = constraints.maxWidth > 800;
 
-                  return StreamBuilder<List<FridgeItem>>(
-                    stream: _firestoreService.getFridgeItems(user.uid),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF667eea),
-                            ),
-                          ),
-                        );
-                      }
-
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Error: ${snapshot.error}',
-                                style: const TextStyle(
-                                  color: Color(0xFF718096),
-                                  fontSize: 16,
+                      return StreamBuilder<List<FridgeItem>>(
+                        stream: _firestoreService.getFridgeItems(user.uid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
                                 ),
                               ),
-                            ],
-                          ),
-                        );
-                      }
+                            );
+                          }
 
-                      final items = snapshot.data ?? [];
-                      if (items.isEmpty) return const EmptyStateWidget();
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Error: ${snapshot.error}',
+                                    style: const TextStyle(
+                                      color: Color(0xFF718096),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
 
-                      // Filter and group items
-                      final filteredItems = items.where((item) {
-                        return !_isSearching ||
-                            item.name.toLowerCase().contains(_searchController.text.toLowerCase());
-                      }).toList();
+                          final items = snapshot.data ?? [];
+                          if (items.isEmpty) return const EmptyStateWidget();
 
-                      if (filteredItems.isEmpty) return const NoResultsWidget();
+                          // Filter and group items
+                          final filteredItems = items.where((item) {
+                            return !_isSearching ||
+                                item.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                          }).toList();
 
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          left: isDesktop ? 32 : 16,
-                          right: isDesktop ? 32 : 16,
-                          top: 16,
-                          bottom: 16,
-                        ),
-                        child: CategorySectionWidget(
-                          items: filteredItems,
-                          onDeleteItem: (item) =>
-                              _showDeleteItemDialog(context, item),
-                          onEditItem: (item) =>
-                              _showEditItemDialog(context, item),
-                        ),
+                          if (filteredItems.isEmpty) return const NoResultsWidget();
+
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              left: isDesktop ? 32 : 16,
+                              right: isDesktop ? 32 : 16,
+                              top: 16,
+                              bottom: 16,
+                            ),
+                            child: CategorySectionWidget(
+                              items: filteredItems,
+                              onDeleteItem: (item) =>
+                                  _showDeleteItemDialog(context, item),
+                              onEditItem: (item) =>
+                                  _showEditItemDialog(context, item),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
-            ),
+                  ),
+                ),
 
-            // ===== Fixed Bottom Action Bar =====
-            _buildBottomActionBar(context, user),
-          ],
-        ),
+                // ===== Fixed Bottom Action Bar =====
+                _buildBottomActionBar(context, user),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -231,18 +281,34 @@ class _HomeScreenState extends State<HomeScreen> {
         final items = snapshot.data ?? [];
         final hasItems = items.isNotEmpty;
 
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
+        return ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.15),
+                    Colors.white.withValues(alpha: 0.05),
+                  ],
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: SafeArea(
             child: Row(
               children: [
@@ -264,10 +330,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF667eea),
+                      backgroundColor: Colors.white.withValues(alpha: 0.25),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
                       elevation: 0,
                     ),
@@ -289,17 +360,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF764ba2),
-                      disabledBackgroundColor: Colors.grey[300],
+                      backgroundColor: Colors.white.withValues(alpha: 0.25),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+                      disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
                       elevation: 0,
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
             ),
           ),
         );
