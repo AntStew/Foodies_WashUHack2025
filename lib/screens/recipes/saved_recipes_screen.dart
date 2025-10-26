@@ -114,7 +114,9 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Home button
             IconButton(
@@ -132,10 +134,13 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
               },
             ),
             const SizedBox(width: 8),
-            // Search bar (takes up remaining space)
-            Expanded(
-              child: _buildSearchBar(),
-            ),
+             // Search bar (constrained to half screen width and centered)
+             Center(
+               child: SizedBox(
+                 width: MediaQuery.of(context).size.width * 0.5,
+                 child: _buildSearchBar(),
+               ),
+             ),
             const SizedBox(width: 8),
             // Filter button
             _buildFilterButton(),
@@ -152,19 +157,19 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.white.withOpacity(0.15),
-                    Colors.white.withOpacity(0.05),
+                    Colors.white.withValues(alpha: 0.15),
+                    Colors.white.withValues(alpha: 0.05),
                   ],
                 ),
                 border: Border(
                   bottom: BorderSide(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -207,8 +212,8 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.3),
+                    Colors.black.withValues(alpha: 0.6),
                   ],
                 ),
               ),
@@ -360,7 +365,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -372,10 +377,10 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -395,19 +400,19 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
               decoration: InputDecoration(
                 hintText: 'Search recipes...',
                 hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(
                   Icons.search,
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   size: 20,
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
                         icon: Icon(
                           Icons.clear,
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           size: 16,
                         ),
                         onPressed: () {
@@ -445,7 +450,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -457,16 +462,16 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
               child: Icon(
                 Icons.filter_list,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 size: 20,
               ),
             ),
@@ -485,7 +490,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
           });
         },
         child: Container(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withValues(alpha: 0.5),
           child: Center(
             child: GestureDetector(
               onTap: () {}, // Prevent closing when tapping on the popup itself
@@ -499,7 +504,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -511,10 +516,10 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                     filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -531,7 +536,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                                 Text(
                                   'Filters',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white.withValues(alpha: 0.9),
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -545,12 +550,12 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: Colors.white.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
                                       Icons.close,
-                                      color: Colors.white.withOpacity(0.9),
+                                      color: Colors.white.withValues(alpha: 0.9),
                                       size: 18,
                                     ),
                                   ),
@@ -562,7 +567,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                             Text(
                               'Cuisine',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -585,13 +590,13 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? Colors.orange.withOpacity(0.8)
-                                          : Colors.white.withOpacity(0.2),
+                                          ? Colors.orange.withValues(alpha: 0.8)
+                                          : Colors.white.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
                                         color: isSelected
                                             ? Colors.orange
-                                            : Colors.white.withOpacity(0.3),
+                                            : Colors.white.withValues(alpha: 0.3),
                                         width: 1,
                                       ),
                                     ),
@@ -612,7 +617,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                             Text(
                               'Sort By',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -635,13 +640,13 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? Colors.orange.withOpacity(0.8)
-                                          : Colors.white.withOpacity(0.2),
+                                          ? Colors.orange.withValues(alpha: 0.8)
+                                          : Colors.white.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
                                         color: isSelected
                                             ? Colors.orange
-                                            : Colors.white.withOpacity(0.3),
+                                            : Colors.white.withValues(alpha: 0.3),
                                         width: 1,
                                       ),
                                     ),
@@ -668,7 +673,7 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> {
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange.withOpacity(0.8),
+                                  backgroundColor: Colors.orange.withValues(alpha: 0.8),
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(
@@ -828,14 +833,9 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                   onTapDown: _onTapDown,
                   onTapUp: _onTapUp,
                   onTapCancel: _onTapCancel,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecipeDetailScreen(recipe: widget.recipe),
-                      ),
-                    );
-                  },
+                   onTap: () {
+                     _showRecipePopup(context, widget.recipe);
+                   },
                   child: AnimatedBuilder(
                     animation: Listenable.merge([_animationController, _hoverController]),
                     builder: (context, child) {
@@ -858,31 +858,31 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                 // Hover glow effect
                                 if (_isHovered && !_isPressed)
                                   BoxShadow(
-                                    color: Colors.orange.withOpacity(0.3 * _hoverGlowAnimation.value),
+                                    color: Colors.orange.withValues(alpha: 0.3 * _hoverGlowAnimation.value),
                                     blurRadius: 25 * _hoverGlowAnimation.value,
                                     offset: Offset(0, 10 * _hoverGlowAnimation.value),
                                     spreadRadius: 5 * _hoverGlowAnimation.value,
                                   ),
                                 // Dynamic shadow based on press state and hover
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(
-                                    _isPressed ? 0.25 : (0.15 + 0.1 * _hoverGlowAnimation.value)
+                                  color: Colors.black.withValues(
+                                    alpha: _isPressed ? 0.25 : (0.15 + 0.1 * _hoverGlowAnimation.value)
                                   ),
                                   blurRadius: _isPressed ? 15 : (20 + 10 * _hoverGlowAnimation.value),
                                   offset: Offset(0, _isPressed ? 4 : (8 + 5 * _hoverGlowAnimation.value)),
                                   spreadRadius: _isPressed ? 1 : (2 + 2 * _hoverGlowAnimation.value),
                                 ),
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(
-                                    _isPressed ? 0.15 : (0.1 + 0.05 * _hoverGlowAnimation.value)
+                                  color: Colors.black.withValues(
+                                    alpha: _isPressed ? 0.15 : (0.1 + 0.05 * _hoverGlowAnimation.value)
                                   ),
                                   blurRadius: _isPressed ? 30 : (40 + 15 * _hoverGlowAnimation.value),
                                   offset: Offset(0, _isPressed ? 8 : (16 + 8 * _hoverGlowAnimation.value)),
                                   spreadRadius: _isPressed ? 2 : (4 + 3 * _hoverGlowAnimation.value),
                                 ),
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(
-                                    _isPressed ? 0.08 : (0.05 + 0.03 * _hoverGlowAnimation.value)
+                                  color: Colors.black.withValues(
+                                    alpha: _isPressed ? 0.08 : (0.05 + 0.03 * _hoverGlowAnimation.value)
                                   ),
                                   blurRadius: _isPressed ? 45 : (60 + 20 * _hoverGlowAnimation.value),
                                   offset: Offset(0, _isPressed ? 12 : (24 + 12 * _hoverGlowAnimation.value)),
@@ -890,7 +890,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                 ),
                                 // Inner highlight with hover enhancement
                                 BoxShadow(
-                                  color: Colors.white.withOpacity(0.15 + 0.1 * _hoverGlowAnimation.value),
+                                  color: Colors.white.withValues(alpha: 0.15 + 0.1 * _hoverGlowAnimation.value),
                                   blurRadius: 2 + 1 * _hoverGlowAnimation.value,
                                   offset: const Offset(0, -1),
                                   spreadRadius: 0,
@@ -903,7 +903,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -932,8 +932,8 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                             end: Alignment.bottomCenter,
                                             colors: [
                                               Colors.transparent,
-                                              Colors.black.withOpacity(0.3),
-                                              Colors.black.withOpacity(0.8),
+                                              Colors.black.withValues(alpha: 0.3),
+                                              Colors.black.withValues(alpha: 0.8),
                                             ],
                                             stops: const [0.0, 0.6, 1.0],
                                           ),
@@ -950,9 +950,9 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                             center: Alignment.topLeft,
                                             radius: 1.5,
                                             colors: [
-                                              Colors.white.withOpacity(0.1),
+                                              Colors.white.withValues(alpha: 0.1),
                                               Colors.transparent,
-                                              Colors.black.withOpacity(0.2),
+                                              Colors.black.withValues(alpha: 0.2),
                                             ],
                                             stops: const [0.0, 0.3, 1.0],
                                           ),
@@ -995,7 +995,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                             Text(
                                               widget.recipe.description,
                                               style: TextStyle(
-                                                color: Colors.white.withOpacity(0.9),
+                                                color: Colors.white.withValues(alpha: 0.9),
                                                 fontSize: 12,
                                                 shadows: const [
                                                   Shadow(
@@ -1034,22 +1034,22 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                         child: Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.9),
+                                            color: Colors.red.withValues(alpha: 0.9),
                                             shape: BoxShape.circle,
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.red.withOpacity(0.4),
+                                                color: Colors.red.withValues(alpha: 0.4),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
+                                                color: Colors.black.withValues(alpha: 0.2),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 2),
                                               ),
                                               // Inner highlight
                                               BoxShadow(
-                                                color: Colors.white.withOpacity(0.3),
+                                                color: Colors.white.withValues(alpha: 0.3),
                                                 blurRadius: 1,
                                                 offset: const Offset(0, -1),
                                               ),
@@ -1096,7 +1096,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.3),
+            color: Colors.orange.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1112,9 +1112,9 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                   center: Alignment.topLeft,
                   radius: 1.0,
                   colors: [
-                    Colors.white.withOpacity(0.2),
+                    Colors.white.withValues(alpha: 0.2),
                     Colors.transparent,
-                    Colors.black.withOpacity(0.1),
+                    Colors.black.withValues(alpha: 0.1),
                   ],
                 ),
               ),
@@ -1163,6 +1163,285 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
     if (confirm == true) {
       await firestoreService.deleteRecipe(uid, recipe.id);
     }
+  }
+
+  void _showRecipePopup(BuildContext context, Recipe recipe) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: 500,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Recipe Image
+                      Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                          child: recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty
+                              ? Image.network(
+                                  recipe.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return _buildPopupFallbackImage();
+                                  },
+                                )
+                              : _buildPopupFallbackImage(),
+                        ),
+                      ),
+                      // Recipe Content
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Text(
+                              recipe.title,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Description
+                            Text(
+                              recipe.description,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.8),
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Recipe Info
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _buildPopupInfoChip(recipe.cuisine, Icons.restaurant),
+                                _buildPopupInfoChip('${recipe.servings} servings', Icons.people),
+                                _buildPopupInfoChip(recipe.prepTime, Icons.access_time),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            // Ingredients
+                            Text(
+                              'Ingredients',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...recipe.ingredients.map((ingredient) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '• ',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.8),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      ingredient,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.8),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )).toList(),
+                            const SizedBox(height: 20),
+                            // Instructions
+                            Text(
+                              'Instructions',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...recipe.instructions.asMap().entries.map((entry) {
+                              int index = entry.key + 1;
+                              String instruction = entry.value;
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withValues(alpha: 0.8),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '$index',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        instruction,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(alpha: 0.8),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            const SizedBox(height: 20),
+                            // Close Button
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange.withValues(alpha: 0.8),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: const Text(
+                                  'Close',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPopupFallbackImage() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.orange.shade300,
+            Colors.orange.shade500,
+            Colors.orange.shade700,
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.restaurant,
+          color: Colors.white,
+          size: 64,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPopupInfoChip(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 16,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1234,30 +1513,30 @@ class _HoverableChipState extends State<_HoverableChip> with SingleTickerProvide
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.25 + 0.1 * _glowAnimation.value),
+                color: Colors.white.withValues(alpha: 0.25 + 0.1 * _glowAnimation.value),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.4 + 0.2 * _glowAnimation.value),
+                  color: Colors.white.withValues(alpha: 0.4 + 0.2 * _glowAnimation.value),
                   width: 1,
                 ),
                 boxShadow: [
                   // Enhanced shadow on hover
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2 + 0.1 * _glowAnimation.value),
+                    color: Colors.black.withValues(alpha: 0.2 + 0.1 * _glowAnimation.value),
                     blurRadius: 4 + 2 * _glowAnimation.value,
                     offset: Offset(0, 2 + 1 * _glowAnimation.value),
                   ),
                   // Glow effect
                   if (_isHovered)
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.3 * _glowAnimation.value),
+                      color: Colors.orange.withValues(alpha: 0.3 * _glowAnimation.value),
                       blurRadius: 8 * _glowAnimation.value,
                       offset: const Offset(0, 0),
                       spreadRadius: 2 * _glowAnimation.value,
                     ),
                   // Inner highlight
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.3 + 0.2 * _glowAnimation.value),
+                    color: Colors.white.withValues(alpha: 0.3 + 0.2 * _glowAnimation.value),
                     blurRadius: 1 + 1 * _glowAnimation.value,
                     offset: const Offset(0, -1),
                   ),
