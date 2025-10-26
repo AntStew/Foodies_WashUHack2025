@@ -1452,9 +1452,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
       ),
     );
   }
-}
-
-class _HoverableChip extends StatefulWidget {
+}class _HoverableChip extends StatefulWidget {
   final String text;
   final IconData icon;
 
@@ -1584,3 +1582,4 @@ class _HoverableChipState extends State<_HoverableChip> with SingleTickerProvide
     );
   }
 }
+

@@ -99,14 +99,14 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
              child: ClipRect(
                child: BackdropFilter(
                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                 child: AppBar(
-                   leading: IconButton(
-                     icon: const Icon(Icons.arrow_back, color: Colors.black),
-                     onPressed: () {
-                       Navigator.pushReplacementNamed(context, '/home');
-                     },
-                   ),
-                   automaticallyImplyLeading: false,
+                  child: AppBar(
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    automaticallyImplyLeading: false,
                    title: Text(
                      'Shopping List',
                      style: TextStyle(

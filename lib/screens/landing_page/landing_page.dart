@@ -49,11 +49,13 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final showFullNav = screenWidth > 800; // Hide nav links on smaller screens
+
     return AppBar(
       elevation: 6,
       centerTitle: false,
       backgroundColor: const Color(0xF21F2A36), // ~95% opaque dark blue-gray
-      // If you prefer slightly lighter: const Color(0xE61F2A36)
       shadowColor: Colors.black.withOpacity(0.25),
       titleSpacing: 8,
       title: Row(
@@ -77,29 +79,43 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        const _TopLink(label: 'Why'),
-        const _TopLink(label: 'How it works'),
-        const _TopLink(label: 'Reviews'),
-        const SizedBox(width: 8),
-        // Login
+        // Navigation links - only show on larger screens
+        if (showFullNav) ...[
+          const _TopLink(label: 'Why'),
+          const _TopLink(label: 'How it works'),
+          const _TopLink(label: 'Reviews'),
+          const SizedBox(width: 8),
+        ],
+        // Login button
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: OutlinedButton.icon(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          child: OutlinedButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
               side: const BorderSide(color: Colors.white, width: 2),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: showFullNav ? 14 : 12,
+                vertical: 10,
+              ),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             ),
-            icon: const Icon(Icons.login_rounded, size: 18),
-            label: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.login_rounded, size: 18),
+                if (showFullNav) ...[
+                  const SizedBox(width: 6),
+                  const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              ],
+            ),
           ),
         ),
-        const SizedBox(width: 10),
-        // Sign Up
+        const SizedBox(width: 4),
+        // Sign Up button
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: const LinearGradient(colors: [kTomatoRed, kEggYellow]),
@@ -108,18 +124,29 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
                 BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4)),
               ],
             ),
-            child: ElevatedButton.icon(
+            child: ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: EdgeInsets.symmetric(
+                  horizontal: showFullNav ? 16 : 12,
+                  vertical: 10,
+                ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               ),
-              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18, color: Colors.white),
-              label: const Text(
-                'Sign Up',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.person_add_alt_1_rounded, size: 18, color: Colors.white),
+                  if (showFullNav) ...[
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Sign Up',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
@@ -199,69 +226,72 @@ class _HeroSplit extends StatelessWidget {
                           elevation: 20,
                           color: Colors.white.withOpacity(.97),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 60),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Big logo (no name text)
-                                Center(
-                                  child: Image.asset(
-                                    'design/Assestss/LOGO.png',
-                                    height: 190,
-                                    errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.restaurant_menu_rounded, size: 150, color: kTomatoRed),
-                                  ),
-                                ),
-                                const SizedBox(height: 22),
-                                // Sub-headline
-                                const Text.rich(
-                                  TextSpan(children: [
-                                    TextSpan(
-                                      text: "What's For ",
-                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kCharcoal),
-                                    ),
-                                    TextSpan(
-                                      text: "Dinner?",
-                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kTomatoRed),
-                                    ),
-                                  ]),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  "Turn your fridge chaos into delicious meals — powered by AI.",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.black87, fontSize: 17, fontWeight: FontWeight.w500),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  "No more food waste. No more 6pm panic. Just good food.",
-                                  textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 15),
-                                ),
-                                const SizedBox(height: 32),
-                                _GradientButton(
-                                  label: "Start Cooking Smart",
-                                  icon: Icons.search_rounded,
-                                  onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
-                                ),
-                                const SizedBox(height: 14),
-                                SizedBox(
-                                  height: 56, width: double.infinity,
-                                  child: OutlinedButton(
-                                    onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: kCharcoal, width: 2),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                    ),
-                                    child: const Text(
-                                      'Already a Chef? Log In',
-                                      style: TextStyle(color: kCharcoal, fontWeight: FontWeight.w600),
+                          child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 60),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Big logo (no name text)
+                                  Center(
+                                    child: Image.asset(
+                                      'design/Assestss/LOGO.png',
+                                      height: 190,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Icon(Icons.restaurant_menu_rounded, size: 150, color: kTomatoRed),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 22),
+                                  // Sub-headline
+                                  const Text.rich(
+                                    TextSpan(children: [
+                                      TextSpan(
+                                        text: "What's For ",
+                                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kCharcoal),
+                                      ),
+                                      TextSpan(
+                                        text: "Dinner?",
+                                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kTomatoRed),
+                                      ),
+                                    ]),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    "Turn your fridge chaos into delicious meals — powered by AI.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.black87, fontSize: 17, fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    "No more food waste. No more 6pm panic. Just good food.",
+                                    textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 32),
+                                  _GradientButton(
+                                    label: "Start Cooking Smart",
+                                    icon: Icons.search_rounded,
+                                    onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
+                                  ),
+                                  const SizedBox(height: 14),
+                                  SizedBox(
+                                    height: 56, width: double.infinity,
+                                    child: OutlinedButton(
+                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(color: kCharcoal, width: 2),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                      ),
+                                      child: const Text(
+                                        'Already a Chef? Log In',
+                                        style: TextStyle(color: kCharcoal, fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -301,14 +331,6 @@ class _HeroSplit extends StatelessWidget {
               ),
             ),
           ),
-
-          // Scroll hint (chevron)
-          const Positioned(
-            bottom: 16,
-            left: 0,
-            right: 0,
-            child: _ScrollHint(),
-          ),
         ],
       ),
     );
@@ -334,20 +356,6 @@ class _AiBadgeStatic extends StatelessWidget {
           Text('AI Analyzing… 23 ingredients found', style: TextStyle(fontWeight: FontWeight.w600)),
         ]),
       ),
-    );
-  }
-}
-
-class _ScrollHint extends StatelessWidget {
-  const _ScrollHint();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white70, size: 34),
-        Text('Scroll', style: TextStyle(color: Colors.white70)),
-      ],
     );
   }
 }

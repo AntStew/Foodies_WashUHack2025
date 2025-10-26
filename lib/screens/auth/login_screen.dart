@@ -258,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _passwordController,
                             obscureText: _obscure,
                             decoration: InputDecoration(
-                              hintText: '••••••••',
+                              hintText: 'Password',
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 onPressed: () => setState(() => _obscure = !_obscure),

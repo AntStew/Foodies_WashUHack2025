@@ -85,32 +85,21 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          // Background Image
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('design/background/fooood.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          // Dark overlay - replaced BackdropFilter with static overlay
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.3),
-              ),
-            ),
-          ),
-          // Main Content
-          SafeArea(
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('design/background/fooood.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.3),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          body: SafeArea(
             child: Column(
               children: [
                 // ===== Optimized Header (removed BackdropFilter) =====
@@ -177,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -281,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     tooltip: 'Shopping List',
                     onPressed: () {
-                      Navigator.pushNamed(context, '/shopping-list');
+                      Navigator.pushNamed(context, AppRoutes.shoppingList);
                     },
                   ),
                   IconButton(

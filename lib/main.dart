@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Foodies',
+      title: 'CookNUp',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
@@ -55,9 +55,37 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadePageTransitionsBuilder(),
+            TargetPlatform.iOS: FadePageTransitionsBuilder(),
+            TargetPlatform.linux: FadePageTransitionsBuilder(),
+            TargetPlatform.macOS: FadePageTransitionsBuilder(),
+            TargetPlatform.windows: FadePageTransitionsBuilder(),
+          },
+        ),
       ),
       initialRoute: AppRoutes.landing,
       routes: AppRoutes.routes,
+    );
+  }
+}
+
+/// Custom page transitions builder for fade effect
+class FadePageTransitionsBuilder extends PageTransitionsBuilder {
+  const FadePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: animation,
+      child: child,
     );
   }
 }
