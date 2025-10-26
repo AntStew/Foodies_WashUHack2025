@@ -28,7 +28,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   final List<String> _selectedAllergies = [];
 
   // Keep serving size for compatibility with your existing Firestore call.
-  int _servingSize = 2;
+  final int _servingSize = 2;
 
   bool _isLoading = false;
   int _stepIndex = 0; // 0..3
@@ -418,7 +418,6 @@ class _ResponsiveGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
       final isWide = c.maxWidth >= 900;
-      final crossAxisCount = isWide ? 2 : 1;
       final spacing = 16.0;
 
       return Wrap(
