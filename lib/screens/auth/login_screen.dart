@@ -64,6 +64,56 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _showForgotPasswordDialog() async {
+    final emailController = TextEditingController(text: _emailController.text.trim());
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: TextField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) return;
+              
+              final navigator = Navigator.of(context);
+
+              try {
+                await _authService.resetPassword(email);
+                if (!mounted) return;
+                navigator.pop();
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(content: Text('Password reset email sent! Check your inbox.')),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('Error: ${e.toString()}')),
+                );
+              }
+            },
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+    emailController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,9 +267,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {
-                                // TODO: hook up forgot-password screen if you have one
-                              },
+                              onPressed: _showForgotPasswordDialog,
                               child: const Text('Forgot your secret sauce?'),
                             ),
                           ),

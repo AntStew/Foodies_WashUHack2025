@@ -181,18 +181,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: const Icon(Icons.logout, color: Colors.white),
                         tooltip: 'Sign Out',
                         onPressed: () async {
+                          final navigator = Navigator.of(context);
                           await _authService.signOut();
                           if (!mounted) return;
-                          Navigator.pushReplacementNamed(context, '/login');
+                          navigator.pushReplacementNamed('/login');
                         },
                       ),
                     ],
                   ),
                 ),
-                      ),
-                    ),
-                  ),
-                ),
+              ),
+            ),
+          ),
+        ),
 
                 // ===== Static Fridge Content =====
                 Expanded(
@@ -309,76 +310,76 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: SafeArea(
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/scan-fridge');
-                    },
-                    icon: Icon(
-                      hasItems ? Icons.refresh : Icons.camera_alt_rounded,
-                      color: Colors.white,
-                    ),
-                    label: Text(
-                      hasItems ? 'Rescan Fridge' : 'Scan Fridge',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.25),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/scan-fridge');
+                        },
+                        icon: Icon(
+                          hasItems ? Icons.refresh : Icons.camera_alt_rounded,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          hasItems ? 'Rescan Fridge' : 'Scan Fridge',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.25),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          elevation: 0,
                         ),
                       ),
-                      elevation: 0,
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: hasItems
-                        ? () => Navigator.pushNamed(context, '/recipe_generate')
-                        : null,
-                    icon: const Icon(Icons.restaurant_menu_rounded, color: Colors.white),
-                    label: const Text(
-                      'Generate Recipe',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.25),
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
-                      disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: hasItems
+                            ? () => Navigator.pushNamed(context, '/recipe_generate')
+                            : null,
+                        icon: const Icon(Icons.restaurant_menu_rounded, color: Colors.white),
+                        label: const Text(
+                          'Generate Recipe',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.25),
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+                          disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          elevation: 0,
                         ),
                       ),
-                      elevation: 0,
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
             ),
           ),
         );
@@ -410,6 +411,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showEditItemDialog(BuildContext context, FridgeItem item) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     try {
       final result = await showDialog<FridgeItem>(
         context: context,
@@ -429,7 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
 
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text('${result.name} updated successfully'),
               backgroundColor: Colors.green,
@@ -438,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         } catch (e) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text('Error updating item: ${e.toString()}'),
               backgroundColor: Colors.red,
@@ -449,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text('Error opening edit dialog: ${e.toString()}'),
           backgroundColor: Colors.red,

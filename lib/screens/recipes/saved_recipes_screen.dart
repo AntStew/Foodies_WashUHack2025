@@ -3,7 +3,6 @@ import 'dart:ui';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/recipe_model.dart';
-import 'recipe_detail_screen.dart';
 
 class SavedRecipesScreen extends StatefulWidget {
   const SavedRecipesScreen({super.key});
@@ -1298,7 +1297,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                   ),
                                 ],
                               ),
-                            )).toList(),
+                            )),
                             const SizedBox(height: 20),
                             // Instructions
                             Text(
@@ -1349,7 +1348,7 @@ class _RecipeCard3DState extends State<_RecipeCard3D> with TickerProviderStateMi
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                             const SizedBox(height: 20),
                             // Close Button
                             SizedBox(

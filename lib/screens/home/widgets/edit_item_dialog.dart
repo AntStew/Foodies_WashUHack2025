@@ -96,7 +96,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
 
             // Category Dropdown
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: InputDecoration(
                 labelText: 'Category',
                 prefixIcon: const Icon(Icons.category_outlined, color: Color(0xFF667eea)),
