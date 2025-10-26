@@ -4,6 +4,8 @@
 
 A Flutter application that uses AI to help you manage your fridge inventory and generate personalized recipes based on available ingredients.
 
+**LINK** https://foodies-e099a.web.app/
+
 ---
 
 ## 📋 Table of Contents

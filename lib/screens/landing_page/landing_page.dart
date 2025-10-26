@@ -12,8 +12,36 @@ const kCharcoal  = Color(0xFF2C3E50);
 /// Shared section padding (uniform everywhere)
 const kSectionPad = EdgeInsets.symmetric(horizontal: 24, vertical: 56);
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
+
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _whySectionKey = GlobalKey();
+  final GlobalKey _howItWorksSectionKey = GlobalKey();
+  final GlobalKey _reviewsSectionKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSection(GlobalKey key) {
+    final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero).dy;
+    final scrollPosition = position - 100; // Offset for app bar height
+    
+    _scrollController.animateTo(
+      scrollPosition,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +49,21 @@ class LandingPage extends StatelessWidget {
       backgroundColor: kCream,
       // IMPORTANT: body is NOT behind the app bar anymore
       extendBodyBehindAppBar: false,
-      appBar: const _TopBar(), // sticky horizontal bar, more opaque for readability
+      appBar: _TopBar(
+        onWhyPressed: () => _scrollToSection(_whySectionKey),
+        onHowItWorksPressed: () => _scrollToSection(_howItWorksSectionKey),
+        onReviewsPressed: () => _scrollToSection(_reviewsSectionKey),
+      ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
-          children: const [
-            _HeroSplit(),
-            _WhyCookNUp(),
-            _FeaturesWithImages(),
-            _Reviews(),
-            _CtaTransform(),
-            _FooterColumns(),
+          children: [
+            const _HeroSplit(),
+            _WhyCookNUp(key: _whySectionKey),
+            _FeaturesWithImages(key: _howItWorksSectionKey),
+            _Reviews(key: _reviewsSectionKey),
+            const _CtaTransform(),
+            const _FooterColumns(),
           ],
         ),
       ),
@@ -42,7 +75,15 @@ class LandingPage extends StatelessWidget {
 /// Semi-opaque background so text is readable over any content.
 /// Sits above the hero now (no overlap).
 class _TopBar extends StatelessWidget implements PreferredSizeWidget {
-  const _TopBar();
+  const _TopBar({
+    required this.onWhyPressed,
+    required this.onHowItWorksPressed,
+    required this.onReviewsPressed,
+  });
+
+  final VoidCallback onWhyPressed;
+  final VoidCallback onHowItWorksPressed;
+  final VoidCallback onReviewsPressed;
 
   @override
   Size get preferredSize => const Size.fromHeight(72);
@@ -59,7 +100,7 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           Image.asset(
-            'design/Assestss/LOGO.png',
+            'design/Assestss/CookNUpLogoNoBGNoText.png',
             height: 28,
             errorBuilder: (_, __, ___) =>
                 const Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 24),
@@ -77,9 +118,9 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        const _TopLink(label: 'Why'),
-        const _TopLink(label: 'How it works'),
-        const _TopLink(label: 'Reviews'),
+        _TopLink(label: 'Why', onPressed: onWhyPressed),
+        _TopLink(label: 'How it works', onPressed: onHowItWorksPressed),
+        _TopLink(label: 'Reviews', onPressed: onReviewsPressed),
         const SizedBox(width: 8),
         // Login
         Padding(
@@ -130,17 +171,25 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class _TopLink extends StatelessWidget {
-  const _TopLink({required this.label});
+  const _TopLink({required this.label, required this.onPressed});
   final String label;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+            ),
+          ),
         ),
       ),
     );
@@ -208,28 +257,13 @@ class _HeroSplit extends StatelessWidget {
                                 // Big logo (no name text)
                                 Center(
                                   child: Image.asset(
-                                    'design/Assestss/LOGO.png',
-                                    height: 190,
+                                    'design/Assestss/LOGO-removebg-preview (1).png',
+                                    height: 280,
                                     errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.restaurant_menu_rounded, size: 150, color: kTomatoRed),
+                                        const Icon(Icons.restaurant_menu_rounded, size: 200, color: kTomatoRed),
                                   ),
                                 ),
-                                const SizedBox(height: 22),
-                                // Sub-headline
-                                const Text.rich(
-                                  TextSpan(children: [
-                                    TextSpan(
-                                      text: "What's For ",
-                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kCharcoal),
-                                    ),
-                                    TextSpan(
-                                      text: "Dinner?",
-                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30, color: kTomatoRed),
-                                    ),
-                                  ]),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 32),
                                 const Text(
                                   "Turn your fridge chaos into delicious meals — powered by AI.",
                                   textAlign: TextAlign.center,
@@ -248,16 +282,25 @@ class _HeroSplit extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 14),
                                 SizedBox(
-                                  height: 56, width: double.infinity,
+                                  height: 56, 
+                                  width: double.infinity,
                                   child: OutlinedButton(
                                     onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
                                     style: OutlinedButton.styleFrom(
                                       side: const BorderSide(color: kCharcoal, width: 2),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isMobile ? 16 : 20,
+                                        vertical: 12,
+                                      ),
                                     ),
-                                    child: const Text(
-                                      'Already a Chef? Log In',
-                                      style: TextStyle(color: kCharcoal, fontWeight: FontWeight.w600),
+                                    child: Text(
+                                      isMobile ? 'Already a Chef? Log In' : 'Already a Chef? Log In',
+                                      style: TextStyle(
+                                        color: kCharcoal, 
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: isMobile ? 15 : 16,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -358,8 +401,12 @@ class _GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final buttonText = isMobile ? "Start Cooking" : label;
+    
     return SizedBox(
-      height: 56, width: double.infinity,
+      height: 56, 
+      width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [kEggYellow, kTomatoRed]),
@@ -369,12 +416,21 @@ class _GradientButton extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent, shadowColor: Colors.transparent,
+            backgroundColor: Colors.transparent, 
+            shadowColor: Colors.transparent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            foregroundColor: Colors.white, textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            foregroundColor: Colors.white, 
+            textStyle: TextStyle(
+              fontWeight: FontWeight.w700, 
+              fontSize: isMobile ? 15 : 16,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : 20,
+              vertical: 12,
+            ),
           ),
-          icon: icon != null ? Icon(icon, size: 22) : const SizedBox.shrink(),
-          label: Text(label),
+          icon: icon != null ? Icon(icon, size: isMobile ? 20 : 22) : const SizedBox.shrink(),
+          label: Text(buttonText),
         ),
       ),
     );
@@ -383,7 +439,7 @@ class _GradientButton extends StatelessWidget {
 
 /// ===================  Why CookNUp?  ===================
 class _WhyCookNUp extends StatelessWidget {
-  const _WhyCookNUp();
+  const _WhyCookNUp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -483,7 +539,7 @@ class _ValueCard extends StatelessWidget {
 
 /// ===================  How It Works (image cards)  ===================
 class _FeaturesWithImages extends StatelessWidget {
-  const _FeaturesWithImages();
+  const _FeaturesWithImages({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -620,7 +676,7 @@ class _ImageFeatureCard extends StatelessWidget {
 
 /// ===================  Reviews  ===================
 class _Reviews extends StatelessWidget {
-  const _Reviews();
+  const _Reviews({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -743,7 +799,7 @@ class _CtaTransform extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                "Join thousands of home chefs cooking smarter, not harder",
+                "Join fellow home chefs cooking smarter, not harder",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70, fontSize: 18),
               ),
@@ -756,13 +812,21 @@ class _CtaTransform extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: kTomatoRed,
                     elevation: 8,
-                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width < 600 ? 20 : 26,
+                    ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  icon: const Icon(Icons.rocket_launch_rounded),
-                  label: const Text(
-                    "Get Started Free",
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                  icon: Icon(
+                    Icons.rocket_launch_rounded,
+                    size: MediaQuery.of(context).size.width < 600 ? 20 : 24,
+                  ),
+                  label: Text(
+                    MediaQuery.of(context).size.width < 600 ? "Get Started" : "Get Started Free",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800, 
+                      fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 18,
+                    ),
                   ),
                 ),
               ),
@@ -936,3 +1000,4 @@ class _FooterList extends StatelessWidget {
     );
   }
 }
+
