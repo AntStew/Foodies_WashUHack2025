@@ -105,11 +105,10 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     }
   }
 
-  // ----- Navigation -----
-  bool get _isLastStep => _stepIndex == _steps.length - 1;
 
   void _next() {
-    if (_isLastStep) {
+    // Explicit check: only submit on the last step (stepIndex 3)
+    if (_stepIndex == 3) {
       _submitQuestionnaire();
     } else {
       setState(() => _stepIndex++);
@@ -121,17 +120,22 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }
 
   void _skip() {
-    // Skip the wizard; go home (or you can route to /home later after onboarding)
-    Navigator.pushReplacementNamed(context, '/home');
+    // Skip current question and move to next step
+    if (_stepIndex == 3) {
+      // If on last step, submit questionnaire
+      _submitQuestionnaire();
+    } else {
+      setState(() => _stepIndex++);
+    }
   }
 
   // Validation: disable Next when nothing chosen for the current step
   bool get _canProceed {
     switch (_stepIndex) {
-      case 0: return _skillLevel != null;
-      case 1: return _selectedDietary.isNotEmpty;
-      case 2: return _selectedCuisines.isNotEmpty;
-      case 3: return _selectedAllergies.isNotEmpty || true; // allow empty -> treated as none
+      case 0: return _skillLevel != null; // Skill level is required
+      case 1: return true; // Dietary preferences are optional
+      case 2: return true; // Cuisines are optional  
+      case 3: return true; // Allergies are optional
       default: return true;
     }
   }
@@ -162,13 +166,14 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             ),
 
             // Content
-            SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-              child: Center(
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1100),
+                  constraints: const BoxConstraints(maxWidth: 800),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // Top progress bar & labels
                       _ProgressHeader(
@@ -180,31 +185,30 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                       const SizedBox(height: 18),
 
                       // Title + subtitle (hero-ish)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Column(
-                          children: [
-                            Text(
-                              step.title,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w800,
-                                fontSize: size.width < 600 ? 26 : 36,
-                                color: _kCharcoal,
-                              ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            step.title,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w800,
+                              fontSize: size.width < 600 ? 26 : 36,
+                              color: _kCharcoal,
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              step.subtitle,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.black54,
-                                fontSize: 15,
-                              ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            step.subtitle,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 15,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 26),
 
@@ -240,11 +244,14 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                         const Spacer(),
                         TextButton(
                           onPressed: _skip,
-                          child: const Text('Skip for now', style: TextStyle(color: Colors.black45)),
+                          child: Text(
+                            _stepIndex == 3 ? 'Skip & Finish' : 'Skip',
+                            style: const TextStyle(color: Colors.black45)
+                          ),
                         ),
                         const SizedBox(width: 12),
                         SizedBox(
-                          width: 160,
+                          width: _stepIndex == 3 ? 180 : 160,
                           height: 48,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
@@ -271,7 +278,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                                   : Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(_isLastStep ? 'Start Finding Recipes' : 'Next',
+                                        Text(_stepIndex == 3 ? 'Start Cooking' : 'Next',
                                             style: const TextStyle(fontWeight: FontWeight.w700)),
                                         const SizedBox(width: 6),
                                         const Icon(Icons.chevron_right, size: 20),
@@ -417,10 +424,11 @@ class _ResponsiveGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
-      final isWide = c.maxWidth >= 900;
+      final isWide = c.maxWidth >= 600;
       final spacing = 16.0;
 
       return Wrap(
+        alignment: WrapAlignment.center,
         spacing: spacing,
         runSpacing: spacing,
         children: children

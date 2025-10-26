@@ -60,14 +60,14 @@ class LandingPage extends StatelessWidget {
                               Text.rich(
                                 TextSpan(children: [
                                   TextSpan(
-                                    text: "What's For\n",
+                                    text: "Cook",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w800, color: kCharcoal,
                                       fontSize: size.width < 600 ? 42 : 64,
                                     ),
                                   ),
                                   TextSpan(
-                                    text: "Dinner?",
+                                    text: "N",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                       fontSize: size.width < 600 ? 42 : 64,
@@ -77,22 +77,29 @@ class LandingPage extends StatelessWidget {
                                         ).createShader(const Rect.fromLTWH(0, 0, 300, 60)),
                                     ),
                                   ),
+                                  TextSpan(
+                                    text: "Up",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800, color: kCharcoal,
+                                      fontSize: size.width < 600 ? 42 : 64,
+                                    ),
+                                  ),
                                 ]),
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                "Turn your fridge chaos into delicious meals — powered by AI.",
+                                "What's cookin'? Turn your fridge chaos into delicious meals — powered by AI.",
                                 textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 18),
                               ),
                               const SizedBox(height: 24),
-                              Wrap(
-                                alignment: WrapAlignment.center, spacing: 12, runSpacing: 12,
+                              Column(
                                 children: [
                                   _GradientButton(
-                                    label: "🍳 Start Cooking Smart",
+                                    label: "🍳 Get Started",
                                     onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
                                   ),
+                                  const SizedBox(height: 12),
                                   OutlinedButton(
                                     onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
                                     style: OutlinedButton.styleFrom(
@@ -100,18 +107,9 @@ class LandingPage extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                     ),
-                                    child: const Text("Already a Chef? Log In",
+                                    child: const Text("Login",
                                       style: TextStyle(color: kCharcoal, fontWeight: FontWeight.w600)),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Wrap(
-                                spacing: 16, runSpacing: 16,
-                                children: const [
-                                  _StatPill(color: kTomatoRed, value: "12K+", label: "Active Users"),
-                                  _StatPill(color: Color(0xFFE67E22), value: "50K+", label: "Recipes"),
-                                  _StatPill(color: kHerbGreen, value: "\$1.5K", label: "Avg. Saved"),
                                 ],
                               ),
                             ],
@@ -130,11 +128,6 @@ class LandingPage extends StatelessWidget {
             // ABOUT
             const _About(),
 
-            // REVIEWS
-            const _Reviews(),
-
-            // CTA STRIP
-            const _CtaStrip(),
 
             // FOOTER
             const _Footer(),
@@ -173,42 +166,32 @@ class _GradientButton extends StatelessWidget {
   }
 }
 
-class _StatPill extends StatelessWidget {
-  const _StatPill({required this.color, required this.value, required this.label});
-  final Color color; final String value; final String label;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(18),
-        boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 4))],
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 10),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
-        const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: Colors.black54)),
-      ]),
-    );
-  }
-}
 
 class _Features extends StatelessWidget {
   const _Features();
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
+    
     return Container(
-      color: kCream, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      color: kCream, 
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: isMobile ? 40 : 48),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1100),
         child: Column(children: [
-          const Text("How It Works",
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 38, color: kCharcoal)),
+          Text("How It Works",
+              style: TextStyle(
+                fontWeight: FontWeight.w800, 
+                fontSize: isMobile ? 32 : 38, 
+                color: kCharcoal
+              )),
           const SizedBox(height: 6),
-          const Text("Three simple steps to culinary brilliance",
-              style: TextStyle(color: Colors.black54, fontSize: 18)),
+          Text("Three simple steps to culinary brilliance",
+              style: TextStyle(
+                color: Colors.black54, 
+                fontSize: isMobile ? 16 : 18
+              )),
           const SizedBox(height: 24),
           Wrap(
             spacing: 16, runSpacing: 16, alignment: WrapAlignment.center,
@@ -245,10 +228,13 @@ class _FeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
+    
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 340),
+      constraints: BoxConstraints(maxWidth: isMobile ? 300 : 340),
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(isMobile ? 16 : 18),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: border.withValues(alpha: .25), width: 2),
@@ -256,12 +242,23 @@ class _FeatureCard extends StatelessWidget {
           boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 14, offset: Offset(0, 8))],
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(width: 44, height: 44, decoration: BoxDecoration(color: border, shape: BoxShape.circle),
-            child: Icon(icon, color: Colors.white)),
-          const SizedBox(height: 12),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: kCharcoal)),
-          const SizedBox(height: 8),
-          Text(text, style: const TextStyle(color: Colors.black54)),
+          Container(
+            width: isMobile ? 40 : 44, 
+            height: isMobile ? 40 : 44, 
+            decoration: BoxDecoration(color: border, shape: BoxShape.circle),
+            child: Icon(icon, color: Colors.white, size: isMobile ? 20 : 24)
+          ),
+          SizedBox(height: isMobile ? 10 : 12),
+          Text(title, style: TextStyle(
+            fontWeight: FontWeight.w700, 
+            fontSize: isMobile ? 18 : 20, 
+            color: kCharcoal
+          )),
+          SizedBox(height: isMobile ? 6 : 8),
+          Text(text, style: TextStyle(
+            color: Colors.black54,
+            fontSize: isMobile ? 14 : 16
+          )),
         ]),
       ),
     );
@@ -272,138 +269,168 @@ class _About extends StatelessWidget {
   const _About();
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 800;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 56),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1100),
-        child: Row(children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Image.asset('design/Assestss/2.webp', fit: BoxFit.cover, height: 360),
-            ),
-          ),
-          const SizedBox(width: 24),
-          const Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("Built for Real Kitchens, Not Just Recipes.",
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 32, color: kCharcoal)),
-              SizedBox(height: 12),
-              Text("We help you turn what you already have into meals you love—saving time, money, and the planet.",
-                  style: TextStyle(color: Colors.black87, fontSize: 16)),
-              SizedBox(height: 8),
-              Text("Created at WashU Hackathon with ❤️ for practical cooking.",
-                  style: TextStyle(color: Colors.black54)),
+        child: isMobile 
+          ? Column(children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset('design/Assestss/2.webp', fit: BoxFit.cover, height: 280),
+              ),
+              const SizedBox(height: 24),
+              const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text("Built for Real Kitchens, Not Just Recipes.",
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 28, color: kCharcoal)),
+                SizedBox(height: 12),
+                Text("We help you turn what you already have into meals you love—saving time, money, and the planet.",
+                    style: TextStyle(color: Colors.black87, fontSize: 16)),
+              ]),
+            ])
+          : Row(children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.asset('design/Assestss/2.webp', fit: BoxFit.cover, height: 360),
+                ),
+              ),
+              const SizedBox(width: 24),
+              const Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text("Built for Real Kitchens, Not Just Recipes.",
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 32, color: kCharcoal)),
+                  SizedBox(height: 12),
+                  Text("We help you turn what you already have into meals you love—saving time, money, and the planet.",
+                      style: TextStyle(color: Colors.black87, fontSize: 16)),
+                ]),
+              ),
             ]),
-          ),
-        ]),
       ),
     );
   }
 }
 
-class _Reviews extends StatelessWidget {
-  const _Reviews();
-  @override
-  Widget build(BuildContext context) {
-    final reviews = [
-      ["Saved my weeknights!", "No more 6pm panic. The recipes actually match my fridge.", "— Taylor S."],
-      ["Tastes + Savings", "I save ~\$20/week by using stuff I would've thrown out.", "— Jordan M."],
-      ["So easy", "Snapped a photo, got dinner ideas in seconds. Wild.", "— Priya K."],
-    ];
-    return Container(
-      color: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 56),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(children: [
-          const Text("What People Say",
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 34, color: kCharcoal)),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 16, runSpacing: 16, alignment: WrapAlignment.center,
-            children: reviews.map((r) => _ReviewCard(title: r[0], body: r[1], author: r[2])).toList(),
-          ),
-        ]),
-      ),
-    );
-  }
-}
-
-class _ReviewCard extends StatelessWidget {
-  const _ReviewCard({required this.title, required this.body, required this.author});
-  final String title; final String body; final String author;
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 340),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: kCharcoal)),
-            const SizedBox(height: 8),
-            Text(body, style: const TextStyle(color: Colors.black87)),
-            const SizedBox(height: 10),
-            Text(author, style: const TextStyle(color: Colors.black54, fontStyle: FontStyle.italic)),
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
-class _CtaStrip extends StatelessWidget {
-  const _CtaStrip();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 42),
-      decoration: const BoxDecoration(gradient: LinearGradient(colors: [kEggYellow, kTomatoRed])),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(children: [
-          const Text("Ready to cook smarter?",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white, fontSize: 28)),
-          const SizedBox(height: 12),
-          Wrap(spacing: 12, runSpacing: 12, alignment: WrapAlignment.center, children: [
-            ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white, foregroundColor: kTomatoRed,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-              child: const Text("Create your free account"),
-            ),
-            OutlinedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.white, width: 2), foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-              child: const Text("Log in"),
-            ),
-          ]),
-        ]),
-      ),
-    );
-  }
-}
 
 class _Footer extends StatelessWidget {
   const _Footer();
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
+    
     return Container(
       color: const Color(0xFF1F2A36),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-      child: const Text(
-        "© 2025 What's For Dinner? | Made with ❤️ at WashU Hackathon",
-        textAlign: TextAlign.center, style: TextStyle(color: Colors.white70),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: isMobile ? 32 : 48),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Column(
+          children: [
+            // Main footer content
+            isMobile 
+              ? Column(children: [
+                  const Text(
+                    "CookNUp",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "What's cookin'?",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Turn your fridge chaos into delicious meals — powered by AI.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Created for WashU Hackathon 2025",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white60, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "by Anthony Stewart, Elijah Brown, Navin Bhattarai, and Horlasy D.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white60, fontSize: 12),
+                  ),
+                ])
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "CookNUp",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "What's cookin'?",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 18,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            "Turn your fridge chaos into delicious meals — powered by AI.",
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            "Created for WashU Hackathon 2025",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(color: Colors.white60, fontSize: 16),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "by Anthony Stewart, Elijah Brown,\nNavin Bhattarai, and Horlasy D.",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(color: Colors.white60, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+            const SizedBox(height: 24),
+            const Divider(color: Colors.white30),
+            const SizedBox(height: 16),
+            const Text(
+              "© 2025 CookNUp. All rights reserved.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white60, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }

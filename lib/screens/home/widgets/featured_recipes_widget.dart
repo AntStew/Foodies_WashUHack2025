@@ -17,8 +17,7 @@ class FeaturedRecipesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-          child: Column(
+    return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
@@ -65,8 +64,7 @@ class FeaturedRecipesWidget extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-    );
+          );
   }
 
   Widget _buildEmptyState(BuildContext context) {

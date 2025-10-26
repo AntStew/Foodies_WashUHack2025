@@ -204,7 +204,7 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           Navigator.pushReplacementNamed(context, '/home');
         }

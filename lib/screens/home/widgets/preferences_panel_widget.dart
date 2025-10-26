@@ -318,8 +318,7 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 600;
 
-        return Container(
-          child: Column(
+        return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
@@ -362,8 +361,7 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
                     : _buildVerticalScrollView(),
               ),
             ],
-          ),
-        );
+          );
       },
     );
   }
@@ -526,7 +524,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
         borderRadius: BorderRadius.circular(16),
         child: Container(// Optimized: removed BackdropFilter
           // Removed blur for performance
-          child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -603,7 +600,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
               ],
             ),
           ),
-        ),
       ),
     );
   }
@@ -623,7 +619,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
         borderRadius: BorderRadius.circular(16),
         child: Container(// Optimized: removed BackdropFilter
           // Removed blur for performance
-          child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -734,7 +729,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
               ],
             ),
           ),
-        ),
       ),
     );
   }
@@ -752,7 +746,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
         borderRadius: BorderRadius.circular(16),
         child: Container(// Optimized: removed BackdropFilter
           // Removed blur for performance
-          child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -829,7 +822,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
               ],
             ),
           ),
-        ),
       ),
     );
   }
@@ -848,7 +840,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
         borderRadius: BorderRadius.circular(12),
         child: Container(// Optimized: removed BackdropFilter
           // Removed blur for performance
-          child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
@@ -907,7 +898,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
               ],
             ),
           ),
-        ),
       ),
     );
   }
@@ -926,7 +916,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
         borderRadius: BorderRadius.circular(12),
         child: Container(// Optimized: removed BackdropFilter
           // Removed blur for performance
-          child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
@@ -1012,7 +1001,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
               ],
             ),
           ),
-        ),
       ),
     );
   }
@@ -1030,7 +1018,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
         borderRadius: BorderRadius.circular(12),
         child: Container(// Optimized: removed BackdropFilter
           // Removed blur for performance
-          child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
@@ -1088,7 +1075,6 @@ class _PreferencesPanelWidgetState extends State<PreferencesPanelWidget> {
               ],
             ),
           ),
-        ),
       ),
     );
   }

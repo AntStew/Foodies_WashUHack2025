@@ -25,10 +25,25 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscure = true; // show/hide password
 
   @override
+  void initState() {
+    super.initState();
+    _checkAuthState();
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkAuthState() async {
+    // Check if user is already logged in
+    final user = _authService.currentUser;
+    if (user != null && mounted) {
+      // User is already logged in, redirect to home
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   Future<void> _login() async {
@@ -182,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(width: 12),
                               const Text(
-                                'Foodies',
+                                'CookNUp',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w800,
@@ -342,6 +357,21 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(
                                 color: _kTomatoRed,
                                 fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          
+                          // Go to landing page
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(context, '/');
+                            },
+                            child: const Text(
+                              "Back to Home",
+                              style: TextStyle(
+                                color: _kCharcoal,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
