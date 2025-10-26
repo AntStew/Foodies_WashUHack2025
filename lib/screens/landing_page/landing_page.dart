@@ -947,7 +947,7 @@ class _CreditsRight extends StatelessWidget {
         SizedBox(height: 8),
         // Two names per line, simple and clean
         Text(
-          "Anthony Stewart , Elijah Brown\nNavin Bhattarai & Horlasy D.",
+          "Anthony Stewart , Elijah Brown & Navin Bhattarai.",
           textAlign: TextAlign.left,
           style: TextStyle(color: Colors.white60, fontSize: 14, height: 1.35),
         ),
