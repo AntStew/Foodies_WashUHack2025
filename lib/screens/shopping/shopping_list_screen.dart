@@ -23,27 +23,17 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   final _openAIService = OpenAIService();
   bool _isGenerating = false;
   List<Map<String, dynamic>> _suggestedStores = [];
-  bool _hasTimedOut = false;
-  Timer? _timeoutTimer;
+  StreamSubscription<List<ShoppingListItem>>? _shoppingListSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadSuggestedStores();
-    
-    // Set up timeout timer
-    _timeoutTimer = Timer(const Duration(seconds: 20), () {
-      if (mounted) {
-        setState(() {
-          _hasTimedOut = true;
-        });
-      }
-    });
   }
 
   @override
   void dispose() {
-    _timeoutTimer?.cancel();
+    _shoppingListSubscription?.cancel();
     super.dispose();
   }
 
@@ -60,11 +50,15 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
 
       if (!mounted) return;
       setState(() {
-        _suggestedStores = storesSnapshot.map((store) => {
-          'name': store.name,
-          'reason': store.reason,
-          'categories': store.categories,
-        }).toList();
+        _suggestedStores = storesSnapshot
+            .map(
+              (store) => {
+                'name': store.name,
+                'reason': store.reason,
+                'categories': store.categories,
+              },
+            )
+            .toList();
       });
     } catch (e) {
       // Don't crash if stores can't load, just show empty
@@ -82,255 +76,249 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
 
-     return Scaffold(
-       body: Container(
-         decoration: const BoxDecoration(
-           image: DecorationImage(
-             image: AssetImage('design/background/aisle.jpg'),
-             fit: BoxFit.cover,
-             opacity: 0.6,
-           ),
-         ),
-         child: Scaffold(
-           backgroundColor: Colors.transparent,
-           extendBodyBehindAppBar: true,
-           appBar: PreferredSize(
-             preferredSize: const Size.fromHeight(kToolbarHeight),
-             child: ClipRect(
-               child: BackdropFilter(
-                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: AppBar(
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('design/background/aisle.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.6,
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(kToolbarHeight),
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: AppBar(
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  automaticallyImplyLeading: false,
+                  title: Text(
+                    'Shopping List',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 20,
+                      shadows: [
+                        // Main shadow for depth
+                        Shadow(
+                          offset: const Offset(1, 1),
+                          blurRadius: 2,
+                          color: Colors.black.withValues(alpha: 0.3),
+                        ),
+                        // Highlight shadow for 3D effect
+                        Shadow(
+                          offset: const Offset(-0.5, -0.5),
+                          blurRadius: 1,
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
+                      ],
+                    ),
+                  ),
+                  backgroundColor: Colors.white.withValues(alpha: 0.15),
+                  elevation: 0,
+                  iconTheme: const IconThemeData(color: Colors.black),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.add_circle_outline,
+                        color: Colors.black,
+                      ),
+                      tooltip: 'Add item',
                       onPressed: () {
-                        Navigator.pop(context);
+                        if (user != null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) =>
+                                AddItemDialog(userId: user.uid),
+                          );
+                        }
                       },
                     ),
-                    automaticallyImplyLeading: false,
-                   title: Text(
-                     'Shopping List',
-                     style: TextStyle(
-                       fontWeight: FontWeight.bold,
-                       color: Colors.black,
-                       fontSize: 20,
-                       shadows: [
-                         // Main shadow for depth
-                         Shadow(
-                           offset: const Offset(1, 1),
-                           blurRadius: 2,
-                           color: Colors.black.withValues(alpha: 0.3),
-                         ),
-                         // Highlight shadow for 3D effect
-                         Shadow(
-                           offset: const Offset(-0.5, -0.5),
-                           blurRadius: 1,
-                           color: Colors.white.withValues(alpha: 0.4),
-                         ),
-                       ],
-                     ),
-                   ),
-                   backgroundColor: Colors.white.withValues(alpha: 0.15),
-                   elevation: 0,
-                   iconTheme: const IconThemeData(color: Colors.black),
-                   actions: [
-                     IconButton(
-                       icon: const Icon(Icons.add_circle_outline, color: Colors.black),
-                       tooltip: 'Add item',
-                       onPressed: () {
-                         if (user != null) {
-                           showDialog(
-                             context: context,
-                             builder: (context) => AddItemDialog(userId: user.uid),
-                           );
-                         }
-                       },
-                     ),
-                     IconButton(
-                       icon: const Icon(Icons.delete_sweep, color: Colors.black54),
-                       tooltip: 'Clear checked items',
-                       onPressed: () => _showClearCheckedDialog(context),
-                     ),
-                     IconButton(
-                       icon: const Icon(Icons.delete_forever, color: Colors.red),
-                       tooltip: 'Remove all items',
-                       onPressed: () => _showRemoveAllDialog(context),
-                     ),
-                   ],
-                 ),
-               ),
-             ),
-           ),
-           body: Padding(
-             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + kToolbarHeight),
-             child: user == null
-                 ? const Center(
-                     child: Text(
-                       'Not logged in',
-                       style: TextStyle(fontSize: 16, color: Color(0xFF718096)),
-                     ),
-                   )
-                 : StreamBuilder<List<ShoppingListItem>>(
-                     stream: _firestoreService.getShoppingList(user.uid).timeout(
-                       const Duration(seconds: 15),
-                       onTimeout: (eventSink) {
-                         eventSink.addError('Shopping list loading timed out');
-                         eventSink.close();
-                       },
-                     ),
-                     builder: (context, snapshot) {
-                       // Check for timeout first
-                       if (_hasTimedOut) {
-                         return Center(
-                           child: Column(
-                             mainAxisAlignment: MainAxisAlignment.center,
-                             children: [
-                               Icon(
-                                 Icons.timer_off,
-                                 size: 64,
-                                 color: Colors.orange[300],
-                               ),
-                               const SizedBox(height: 16),
-                               const Text(
-                                 'Loading timed out',
-                                 style: TextStyle(
-                                   color: Color(0xFF718096),
-                                   fontSize: 18,
-                                   fontWeight: FontWeight.w600,
-                                 ),
-                               ),
-                               const SizedBox(height: 8),
-                               const Text(
-                                 'Please check your connection and try again',
-                                 style: TextStyle(
-                                   color: Color(0xFF718096),
-                                   fontSize: 14,
-                                 ),
-                               ),
-                               const SizedBox(height: 16),
-                               ElevatedButton(
-                                 onPressed: () {
-                                   setState(() {
-                                     _hasTimedOut = false;
-                                   });
-                                   _timeoutTimer = Timer(const Duration(seconds: 20), () {
-                                     if (mounted) {
-                                       setState(() {
-                                         _hasTimedOut = true;
-                                       });
-                                     }
-                                   });
-                                 },
-                                 child: const Text('Retry'),
-                               ),
-                             ],
-                           ),
-                         );
-                       }
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete_sweep,
+                        color: Colors.black54,
+                      ),
+                      tooltip: 'Clear checked items',
+                      onPressed: () => _showClearCheckedDialog(context),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_forever, color: Colors.red),
+                      tooltip: 'Remove all items',
+                      onPressed: () => _showRemoveAllDialog(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          body: Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight,
+            ),
+            child: user == null
+                ? const Center(
+                    child: Text(
+                      'Not logged in',
+                      style: TextStyle(fontSize: 16, color: Color(0xFF718096)),
+                    ),
+                  )
+                : StreamBuilder<List<ShoppingListItem>>(
+                    stream: _firestoreService.getShoppingList(user.uid),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF667eea),
+                            ),
+                          ),
+                        );
+                      }
 
-                       if (snapshot.connectionState == ConnectionState.waiting) {
-                         return const Center(
-                           child: CircularProgressIndicator(
-                             valueColor: AlwaysStoppedAnimation<Color>(
-                               Color(0xFF667eea),
-                             ),
-                           ),
-                         );
-                       }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Colors.red[300],
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Error loading shopping list',
+                                style: TextStyle(
+                                  color: Color(0xFF718096),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${snapshot.error}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF718096),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    // Trigger rebuild to retry stream
+                                  });
+                                },
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Retry'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF667eea),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
 
-                       if (snapshot.hasError) {
-                         return Center(
-                           child: Column(
-                             mainAxisAlignment: MainAxisAlignment.center,
-                             children: [
-                               Icon(
-                                 Icons.error_outline,
-                                 size: 64,
-                                 color: Colors.red[300],
-                               ),
-                               const SizedBox(height: 16),
-                               Text(
-                                 'Error: ${snapshot.error}',
-                                 style: const TextStyle(
-                                   color: Color(0xFF718096),
-                                   fontSize: 16,
-                                 ),
-                               ),
-                             ],
-                           ),
-                         );
-                       }
+                      final items = snapshot.data ?? [];
 
-                       final items = snapshot.data ?? [];
+                      if (items.isEmpty) {
+                        return const EmptyStateWidget();
+                      }
 
-                       // Cancel timeout timer since we received data
-                       _timeoutTimer?.cancel();
+                      // Group items by category
+                      final groupedItems = <String, List<ShoppingListItem>>{};
+                      for (final item in items) {
+                        groupedItems
+                            .putIfAbsent(item.category, () => [])
+                            .add(item);
+                      }
 
-                       if (items.isEmpty) {
-                         return const EmptyStateWidget();
-                       }
+                      final sortedCategories = groupedItems.keys.toList()
+                        ..sort();
 
-                       // Group items by category
-                       final groupedItems = <String, List<ShoppingListItem>>{};
-                       for (final item in items) {
-                         groupedItems.putIfAbsent(item.category, () => []).add(item);
-                       }
-
-                       final sortedCategories = groupedItems.keys.toList()..sort();
-
-                       if (isDesktop) {
-                         return _buildDesktopLayout(sortedCategories, groupedItems, user.uid);
-                       } else {
-                         return _buildMobileLayout(sortedCategories, groupedItems, user.uid);
-                       }
-                     },
-                   ),
-           ),
-         ),
-       ),
-       floatingActionButton: _isGenerating
-           ? null
-           : Padding(
-               padding: EdgeInsets.only(
-                 bottom: isDesktop ? 16 : 0,
-                 right: isDesktop ? 16 : 0,
-               ),
-               child: FloatingActionButton.extended(
-                 onPressed: () => _generateShoppingList(context),
-                 backgroundColor: const Color(0xFF667eea),
-                 elevation: 8,
-                 icon: const Icon(Icons.auto_awesome, color: Colors.white, size: 22),
-                 label: Text(
-                   isDesktop ? 'AI Generate Shopping List' : 'AI Generate',
-                   style: TextStyle(
-                     color: Colors.white,
-                     fontWeight: FontWeight.bold,
-                     fontSize: 15,
-                     letterSpacing: 0.5,
-                     shadows: [
-                       // Main shadow for depth
-                       Shadow(
-                         offset: const Offset(1, 1),
-                         blurRadius: 2,
-                         color: Colors.black.withValues(alpha: 0.4),
-                       ),
-                       // Highlight shadow for 3D effect
-                       Shadow(
-                         offset: const Offset(-0.5, -0.5),
-                         blurRadius: 1,
-                         color: Colors.white.withValues(alpha: 0.3),
-                       ),
-                     ],
-                   ),
-                 ),
-               ),
-             ),
-       floatingActionButtonLocation: isDesktop
-           ? FloatingActionButtonLocation.endFloat
-           : FloatingActionButtonLocation.endFloat,
+                      if (isDesktop) {
+                        return _buildDesktopLayout(
+                          sortedCategories,
+                          groupedItems,
+                          user.uid,
+                        );
+                      } else {
+                        return _buildMobileLayout(
+                          sortedCategories,
+                          groupedItems,
+                          user.uid,
+                        );
+                      }
+                    },
+                  ),
+          ),
+        ),
+      ),
+      floatingActionButton: _isGenerating
+          ? null
+          : Padding(
+              padding: EdgeInsets.only(
+                bottom: isDesktop ? 16 : 0,
+                right: isDesktop ? 16 : 0,
+              ),
+              child: FloatingActionButton.extended(
+                onPressed: () => _generateShoppingList(context),
+                backgroundColor: const Color(0xFF667eea),
+                elevation: 8,
+                icon: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                label: Text(
+                  isDesktop ? 'AI Generate Shopping List' : 'AI Generate',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      // Main shadow for depth
+                      Shadow(
+                        offset: const Offset(1, 1),
+                        blurRadius: 2,
+                        color: Colors.black.withValues(alpha: 0.4),
+                      ),
+                      // Highlight shadow for 3D effect
+                      Shadow(
+                        offset: const Offset(-0.5, -0.5),
+                        blurRadius: 1,
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+      floatingActionButtonLocation: isDesktop
+          ? FloatingActionButtonLocation.endFloat
+          : FloatingActionButtonLocation.endFloat,
     );
   }
 
-  Widget _buildDesktopLayout(List<String> categories, Map<String, List<ShoppingListItem>> groupedItems, String userId) {
+  Widget _buildDesktopLayout(
+    List<String> categories,
+    Map<String, List<ShoppingListItem>> groupedItems,
+    String userId,
+  ) {
     // Desktop: Show list on left, stores on right
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,7 +337,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               ),
               child: ListView.builder(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 24,
+                ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
@@ -379,7 +370,11 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
   }
 
-  Widget _buildMobileLayout(List<String> categories, Map<String, List<ShoppingListItem>> groupedItems, String userId) {
+  Widget _buildMobileLayout(
+    List<String> categories,
+    Map<String, List<ShoppingListItem>> groupedItems,
+    String userId,
+  ) {
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(
         dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
@@ -393,25 +388,25 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
-          // Suggested Stores at top for mobile
-          if (_suggestedStores.isNotEmpty) ...[
-            StoreSuggestionsWidget(
-              suggestedStores: _suggestedStores,
-              isCompact: true,
-            ),
-            const SizedBox(height: 20),
-          ],
+            // Suggested Stores at top for mobile
+            if (_suggestedStores.isNotEmpty) ...[
+              StoreSuggestionsWidget(
+                suggestedStores: _suggestedStores,
+                isCompact: true,
+              ),
+              const SizedBox(height: 20),
+            ],
 
-          // Shopping list items
-          ...categories.map((category) {
-            final categoryItems = groupedItems[category]!;
-            return CategorySectionWidget(
-              category: category,
-              items: categoryItems,
-              userId: userId,
-            );
-          }),
-        ],
+            // Shopping list items
+            ...categories.map((category) {
+              final categoryItems = groupedItems[category]!;
+              return CategorySectionWidget(
+                category: category,
+                items: categoryItems,
+                userId: userId,
+              );
+            }),
+          ],
         ),
       ),
     );
@@ -425,7 +420,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear Checked Items'),
-        content: const Text('Remove all checked items from your shopping list?'),
+        content: const Text(
+          'Remove all checked items from your shopping list?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -459,7 +456,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove All Items'),
-        content: const Text('Are you sure you want to remove ALL items from your shopping list? This cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to remove ALL items from your shopping list? This cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -484,13 +483,15 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 ),
               );
             },
-            child: const Text('Remove All', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Remove All',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
   }
-
 
   Future<void> _generateShoppingList(BuildContext context) async {
     final user = _authService.currentUser;
@@ -516,18 +517,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               const SizedBox(height: 20),
               const Text(
                 'AI is generating your shopping list...',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
                 'Based on your fridge and preferences',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -545,7 +540,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       }
 
       // Extract ingredient names from fridge items
-      final currentIngredients = fridgeItemsSnapshot.map((item) => item.name).toList();
+      final currentIngredients = fridgeItemsSnapshot
+          .map((item) => item.name)
+          .toList();
 
       // Clear existing shopping list before generating new one
       await _firestoreService.clearShoppingList(user.uid);
@@ -584,7 +581,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         return {
           'name': store['name'] as String? ?? '',
           'reason': store['reason'] as String? ?? '',
-          'categories': (store['categories'] as List?)?.cast<String>() ?? <String>[],
+          'categories':
+              (store['categories'] as List?)?.cast<String>() ?? <String>[],
         };
       }).toList();
 

@@ -30,7 +30,10 @@ class FirestoreService {
   }
 
   Stream<UserModel?> getUserProfileStream(String uid) {
-    return _db.collection('users').doc(uid).snapshots()
+    return _db
+        .collection('users')
+        .doc(uid)
+        .snapshots()
         .timeout(
           const Duration(seconds: 30),
           onTimeout: (eventSink) {
@@ -87,20 +90,15 @@ class FirestoreService {
         return Stream.value(<FridgeItem>[]);
       }
 
+      AppLogger.info('Creating fridge items stream for user: $uid');
+
       return _db
           .collection('users')
           .doc(uid)
           .collection('fridgeItems')
+          .orderBy('addedDate', descending: true)
           .limit(100)
           .snapshots()
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: (eventSink) {
-              AppLogger.error('Fridge items stream timeout after 30 seconds');
-              eventSink.addError('Fridge items stream timeout');
-              eventSink.close();
-            },
-          )
           .map(_processFridgeItemsSnapshot)
           .handleError(_handleFridgeItemsError);
     } catch (e) {
@@ -114,12 +112,15 @@ class FirestoreService {
       final items = <FridgeItem>[];
       for (final doc in snapshot.docs) {
         try {
-          items.add(FridgeItem.fromMap(doc.id, doc.data() as Map<String, dynamic>));
+          final data = doc.data() as Map<String, dynamic>;
+          items.add(FridgeItem.fromMap(doc.id, data));
         } catch (e) {
           AppLogger.error('Error processing fridge item ${doc.id}: $e');
+          // Continue processing other items even if one fails
         }
       }
-      items.sort((a, b) => b.addedDate.compareTo(a.addedDate));
+      // Items are already sorted by Firestore orderBy
+      AppLogger.debug('Processed ${items.length} fridge items');
       return items;
     } catch (e) {
       AppLogger.error('Error processing fridge items snapshot: $e');
@@ -129,11 +130,17 @@ class FirestoreService {
 
   List<FridgeItem> _handleFridgeItemsError(dynamic error) {
     if (error.toString().contains('TimeoutException')) {
-      AppLogger.error('Fridge items stream timeout: Network connection may be slow or unavailable. Retrying...');
+      AppLogger.error(
+        'Fridge items stream timeout: Network connection may be slow or unavailable. Retrying...',
+      );
     } else if (error.toString().contains('permission-denied')) {
-      AppLogger.error('Fridge items stream error: Permission denied. User may not be authenticated.');
+      AppLogger.error(
+        'Fridge items stream error: Permission denied. User may not be authenticated.',
+      );
     } else if (error.toString().contains('unavailable')) {
-      AppLogger.error('Fridge items stream error: Firestore service is temporarily unavailable.');
+      AppLogger.error(
+        'Fridge items stream error: Firestore service is temporarily unavailable.',
+      );
     } else {
       AppLogger.error('Fridge items stream error: $error');
     }
@@ -188,13 +195,15 @@ class FirestoreService {
   // Recipe Operations
   Stream<List<Recipe>> getSavedRecipes(String uid) {
     try {
+      AppLogger.info('Creating saved recipes stream for user: $uid');
+
       return _db
           .collection('users')
           .doc(uid)
           .collection('recipes')
+          .orderBy('savedAt', descending: true)
           .limit(50)
           .snapshots()
-          .timeout(const Duration(seconds: 30))
           .map(_processSavedRecipesSnapshot)
           .handleError(_handleSavedRecipesError);
     } catch (e) {
@@ -208,12 +217,15 @@ class FirestoreService {
       final recipes = <Recipe>[];
       for (final doc in snapshot.docs) {
         try {
-          recipes.add(Recipe.fromMap(doc.id, doc.data() as Map<String, dynamic>));
+          final data = doc.data() as Map<String, dynamic>;
+          recipes.add(Recipe.fromMap(doc.id, data));
         } catch (e) {
           AppLogger.error('Error processing saved recipe ${doc.id}: $e');
+          // Continue processing other items even if one fails
         }
       }
-      recipes.sort((a, b) => b.savedAt.compareTo(a.savedAt));
+      // Items are already sorted by Firestore orderBy
+      AppLogger.debug('Processed ${recipes.length} saved recipes');
       return recipes;
     } catch (e) {
       AppLogger.error('Error processing saved recipes snapshot: $e');
@@ -259,13 +271,15 @@ class FirestoreService {
   // Shopping List Operations
   Stream<List<ShoppingListItem>> getShoppingList(String uid) {
     try {
+      AppLogger.info('Creating shopping list stream for user: $uid');
+
       return _db
           .collection('users')
           .doc(uid)
           .collection('shoppingList')
+          .orderBy('createdAt', descending: false)
           .limit(200)
           .snapshots()
-          .timeout(const Duration(seconds: 30))
           .map(_processShoppingListSnapshot)
           .handleError(_handleShoppingListError);
     } catch (e) {
@@ -279,12 +293,15 @@ class FirestoreService {
       final items = <ShoppingListItem>[];
       for (final doc in snapshot.docs) {
         try {
-          items.add(ShoppingListItem.fromMap(doc.id, doc.data() as Map<String, dynamic>));
+          final data = doc.data() as Map<String, dynamic>;
+          items.add(ShoppingListItem.fromMap(doc.id, data));
         } catch (e) {
           AppLogger.error('Error processing shopping list item ${doc.id}: $e');
+          // Continue processing other items even if one fails
         }
       }
-      items.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      // Items are already sorted by Firestore orderBy
+      AppLogger.debug('Processed ${items.length} shopping list items');
       return items;
     } catch (e) {
       AppLogger.error('Error processing shopping list snapshot: $e');
@@ -403,19 +420,17 @@ class FirestoreService {
             eventSink.close();
           },
         )
-        .map(
-          (snapshot) {
-            try {
-              return snapshot.docs
-                  .map((doc) => SuggestedStore.fromMap(doc.id, doc.data()))
-                  .toList()
-                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            } catch (e) {
-              AppLogger.error('Error processing suggested stores data: $e');
-              return <SuggestedStore>[];
-            }
-          },
-        )
+        .map((snapshot) {
+          try {
+            return snapshot.docs
+                .map((doc) => SuggestedStore.fromMap(doc.id, doc.data()))
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          } catch (e) {
+            AppLogger.error('Error processing suggested stores data: $e');
+            return <SuggestedStore>[];
+          }
+        })
         .handleError((error) {
           AppLogger.error('Suggested stores stream error: $error');
           return <SuggestedStore>[];

@@ -13,7 +13,9 @@
       "Bash(awk:*)",
       "mcp__ide__getDiagnostics",
       "Bash(flutter format:*)",
-      "Bash(dart format:*)"
+      "Bash(dart format:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter build:*)"
     ],
     "deny": [],
     "ask": []

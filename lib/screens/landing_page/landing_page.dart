@@ -99,7 +99,10 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: const Color(0xF21F2A36), // ~95% opaque dark blue-gray
       shadowColor: Colors.black.withOpacity(0.25),
       titleSpacing: 8,
+      toolbarHeight: 72,
       title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.asset(
             'design/Assestss/CookNUpLogoNoBGNoText.png',
@@ -128,50 +131,17 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: 8),
         ],
         // Login button
-        Padding(
+        Container(
+          height: 72,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-          child: OutlinedButton(
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.white, width: 2),
-              padding: EdgeInsets.symmetric(
-                horizontal: showFullNav ? 14 : 12,
-                vertical: 10,
-              ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.login_rounded, size: 18),
-                if (showFullNav) ...[
-                  const SizedBox(width: 6),
-                  const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
-                ],
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 4),
-        // Sign Up button
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [kTomatoRed, kEggYellow]),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: const [
-                BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4)),
-              ],
-            ),
-            child: ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
+          child: Center(
+            child: OutlinedButton(
+              onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Colors.white, width: 2),
                 padding: EdgeInsets.symmetric(
-                  horizontal: showFullNav ? 16 : 12,
+                  horizontal: showFullNav ? 14 : 12,
                   vertical: 10,
                 ),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -179,15 +149,54 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.person_add_alt_1_rounded, size: 18, color: Colors.white),
+                  const Icon(Icons.login_rounded, size: 18),
                   if (showFullNav) ...[
                     const SizedBox(width: 6),
-                    const Text(
-                      'Sign Up',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
+                    const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
                   ],
                 ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        // Sign Up button
+        Container(
+          height: 72,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          child: Center(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [kTomatoRed, kEggYellow]),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4)),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: showFullNav ? 16 : 12,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.person_add_alt_1_rounded, size: 18, color: Colors.white),
+                    if (showFullNav) ...[
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Sign Up',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -204,14 +213,15 @@ class _TopLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      height: 72,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Center(
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             child: Text(
               label,
               style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
